@@ -1,0 +1,34 @@
+{
+  "extends": "@repo/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@context/*": [
+        "app/context/*"
+      ],
+      "@components/*": [
+        "app/workspace/[id]/components/*"
+      ],
+      "@data/*": [
+        "app/workspace/[workspaceId]/Data/*"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    "next.config.js",
+    ".next/types/**/*.ts",
+    "app/workspace/[id]/components/home/channel/Channel.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
