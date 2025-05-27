@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Permanent_Marker, Nothing_You_Could_Do,Balthazar } from "next/font/google"; // Import Google Font
+import { Permanent_Marker, Nothing_You_Could_Do,Balthazar,Poppins } from "next/font/google"; // Import Google Font
 import "./globals.css";
 
 const geistSans = localFont({
@@ -31,6 +31,12 @@ const balthazarFont = Balthazar({
   variable: "--font-balthazar", 
 });
 
+const poppinsFont = Poppins({
+  weight: "400", 
+  subsets: ["latin"], 
+  variable: "--font-poppins", 
+});
+
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -45,7 +51,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${permanentMarker.variable} ${NothingYouCouldDo.variable}  ${balthazarFont.variable} `}
+        className={`${geistSans.variable} ${geistMono.variable} ${permanentMarker.variable} ${NothingYouCouldDo.variable}  ${balthazarFont.variable} ${poppinsFont.variable} `}
       >
         {children}
       </body>
