@@ -97,7 +97,11 @@ const fileTypeData: Record<FileType, FileTypeMeta> = {
   },
 };
 
-const RecentlyFilesList = () => {
+interface RecentlyFilesListProps {
+  onFileClick: (fileId: string, workspaceId: number, fileType: FileType) => void;
+}
+
+const RecentlyFilesList = ({ onFileClick }: RecentlyFilesListProps) => {
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -154,7 +158,7 @@ const RecentlyFilesList = () => {
   }, [isSearchOpen]);
 
   return (
-    <div className="p-6 md:p-8 lg:p-10 relative lg:px-28 h-full ">
+    <div className="p-6 md:p-8 lg:p-10 relative lg:px-28 h-full overflow-y-auto bg-white">
       <h2 className="text-2xl font-semibold mb-6 text-gray-800">
         Recently viewed
       </h2>
@@ -187,6 +191,7 @@ const RecentlyFilesList = () => {
                 <div className="rounded-lg bg-white border border-gray-200 flex flex-col shadow-sm overflow-hidden">
                   {files.map((file) => (
                     <div
+                    onClick={() => onFileClick(file.id, 1, file.type)} // Assuming workspaceId is 1 for this example
                       key={file.id}
                       className="px-4 py-3 flex items-center gap-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
                     >

@@ -58,7 +58,11 @@ const allFiles: FileItem[] = [
   },
 ];
 
-const CreatedByYou = () => {
+interface CreatedByYouProps {
+  onFileClick: (fileId: string, workspaceId: number) => void;
+}
+
+const CreatedByYou: React.FC<CreatedByYouProps> = ({onFileClick}) => {
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreate, setIsCreate] = useState(false);
@@ -145,6 +149,7 @@ const CreatedByYou = () => {
                 {Files.map((file) => (
                   <div
                     key={file.id}
+                    onClick={() => onFileClick(file.id, 1)} // Assuming workspaceId is 1 for this example
                     className="px-4 py-3 flex items-center gap-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
                   >
                     <div

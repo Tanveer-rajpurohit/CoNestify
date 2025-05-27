@@ -22,6 +22,6 @@
     "packages/*"
   ],
   "dependencies": {
-    "@tldraw/tldraw": "^3.12.1"
+    "@tldraw/tldraw": "^3.13.1"
   }
 }

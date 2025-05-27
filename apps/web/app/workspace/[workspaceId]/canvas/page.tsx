@@ -4,6 +4,7 @@ import Canvas from "./components/Canvas"
 import CanvasSidebar from "./components/CanvasSidebar"
 
 const page = () => {
+  
   return (
     <WorkspaceLayout>
         <div className="h-full w-full bg-[#A69E97] pb-1 pr-1 flex items-start justify-start">
