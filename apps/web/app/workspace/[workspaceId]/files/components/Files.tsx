@@ -3,18 +3,26 @@
 import { selectedFileType } from "@context/FilesContext";
 import AllFilesList from "./file/AllFilesList";
 import RecentlyFilesList from "./file/RecentlyFilesList";
-import { useRouter } from "next/navigation";
 
 const Files = () => {
   const { value: fileType } = selectedFileType();
 
-  const navigate = useRouter();
+ 
   const onFileClick = (fileId: string, workspaceId: number, fileType: string) => {
 
     if(fileType === "canvas"){
 
-      navigate.push(`/workspace/${workspaceId}/canvas/${fileId}`);
+      window.location.href = `/workspace/${workspaceId}/canvas/${fileId}`;
     }
+    else if(fileType === "document"){
+
+      window.location.href = `/workspace/${workspaceId}/docs/${fileId}`;
+    }
+    else if(fileType === "list"){
+
+      window.location.href = `/workspace/${workspaceId}/lists/${fileId}`;
+    }
+
   };
 
   return (

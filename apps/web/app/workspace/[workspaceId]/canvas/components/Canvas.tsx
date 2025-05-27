@@ -3,13 +3,11 @@ import React from "react";
 import { selectedCanvasType } from "@context/CanvasContext";
 import AllCanvas from "./AllCanvas";
 import CreatedByYou from "./CreatedByYou";
-import { useRouter } from "next/navigation";
 
 const Canvas = () => {
   const { value: fileType } = selectedCanvasType();
-  const navigate = useRouter();
   const onFileClick = (fileId: string, workspaceId: number) => {
-    navigate.push(`/workspace/${workspaceId}/canvas/${fileId}`);
+    window.location.href = `/workspace/${workspaceId}/canvas/${fileId}`;
   };
   return (
     <>

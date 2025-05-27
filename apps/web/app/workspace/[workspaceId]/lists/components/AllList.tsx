@@ -62,7 +62,11 @@ const allFiles: FileItem[] = [
 
 
 
-const AllList = () => {
+interface AllListProps {
+    onFileClick: (id: string, arg2: number, type: FileType) => void;
+}
+
+const AllList = ({ onFileClick }: AllListProps) => {
     const [isSearchOpen, setSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [isCreate, setIsCreate] = useState(false);
@@ -150,6 +154,7 @@ const AllList = () => {
                             <div className="rounded-lg bg-white border border-gray-200 flex flex-col shadow-sm overflow-hidden">
                                 {Files.map((file) => (
                                     <div
+                                        onClick={() => onFileClick(file.id, 1, file.type)}
                                         key={file.id}
                                         className="px-4 py-3 flex items-center gap-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
                                     >

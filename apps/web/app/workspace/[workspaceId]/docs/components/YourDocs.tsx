@@ -54,7 +54,11 @@ const allFiles: FileItem[] = [
     },
 ];
 
-const YourDocs = () => {
+interface YourDocsProps {
+    onFileClick: (id: string, arg: number) => void;
+}
+
+const YourDocs = ({onFileClick}: YourDocsProps) => {
     const [isSearchOpen, setSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [isCreate, setIsCreate] = useState(false);
@@ -140,6 +144,7 @@ const YourDocs = () => {
                             <div className="rounded-lg bg-white border border-gray-200 flex flex-col shadow-sm overflow-hidden">
                                 {Files.map((file) => (
                                     <div
+                                        onClick={() => onFileClick(file.id, 1)} 
                                         key={file.id}
                                         className="px-4 py-3 flex items-center gap-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
                                     >
