@@ -93,7 +93,7 @@ const MessageUI = () => {
         if (!groups[message.date]) {
           groups[message.date] = [];
         }
-        groups[message.date].push(message);
+        (groups[message.date] ?? []).push(message);
       });
       
   
