@@ -17,6 +17,9 @@
       ],
       "@data/*": [
         "app/workspace/[workspaceId]/Data/*"
+      ],
+      "@lib/*":[
+        "lib/*"
       ]
     }
   },

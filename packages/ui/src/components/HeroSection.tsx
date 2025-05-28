@@ -7,7 +7,7 @@ const HeroSection = () => {
   const handelnavigate = ()=>{
     const token = localStorage.getItem('authToken');
     if(token){
-      router.push('/dashboard')
+      router.push('/workspace')
     }else{
       router.push('/login')
     }

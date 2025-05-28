@@ -1,0 +1,151 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(cuid())
+  googleId   String   @unique
+  email      String   @unique
+  name       String?
+  image      String?
+  createdAt  DateTime @default(now())
+  members    WorkspaceMember[]
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  docs       Doc[]
+  canvases   CanvasDoc[]
+  lists      List[]
+  uploadedFiles File[] // Relation to File model for uploadedBy
+}
+
+model Workspace {
+  id         String   @id @default(cuid())
+  name       String
+  createdAt  DateTime @default(now())
+  members    WorkspaceMember[]
+  channels   Channel[]
+  canvases   CanvasDoc[]
+  docs       Doc[]
+  lists      List[]
+}
+
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  role        String   // "admin", "member"
+  joinedAt    DateTime @default(now())
+
+  @@unique([userId, workspaceId])
+}
+
+model Channel {
+  id           String     @id @default(cuid())
+  name         String
+  isPrivate    Boolean    @default(false)
+  workspace    Workspace  @relation(fields: [workspaceId], references: [id])
+  workspaceId  String
+  messages     Message[]
+  files        File[]
+  createdAt    DateTime   @default(now())
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
+  senderId    String
+
+  // either in a channel OR personal (receiverId not null)
+  channel     Channel? @relation(fields: [channelId], references: [id])
+  channelId   String?
+
+  receiver    User?    @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiverId  String?
+
+  content     String?
+  type        String   // "text", "file", "canvas", "doc", etc.
+  fileId      String?  // For file reference
+  docId       String?  // For doc
+  doc         Doc?     @relation("DocInMessage", fields: [docId], references: [id])
+  canvasId    String?
+  listId      String?
+
+  list        List?     @relation("ListInMessage", fields: [listId], references: [id])
+
+  createdAt   DateTime @default(now())
+
+  canvas      CanvasDoc? @relation("CanvasInMessage", fields: [canvasId], references: [id])
+}
+
+
+model File {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  type        String   // pdf, image, etc.
+  uploadedBy  User     @relation(fields: [userId], references: [id])
+  userId      String
+
+  channel     Channel  @relation(fields: [channelId], references: [id])
+  channelId   String
+
+  createdAt   DateTime @default(now())
+}
+
+model CanvasDoc {
+  id            String   @id @default(cuid())
+  title         String?
+  data          Json
+  createdBy     User     @relation(fields: [userId], references: [id])
+  userId        String
+
+  workspace     Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId   String
+
+  createdAt     DateTime @default(now())
+  messages      Message[] @relation("CanvasInMessage")
+}
+
+
+model Doc {
+  id            String   @id @default(cuid())
+  title         String?
+  content       Json
+  createdBy     User     @relation(fields: [userId], references: [id])
+  userId        String
+
+  workspace     Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId   String
+
+  createdAt     DateTime @default(now())
+  messages      Message[] @relation("DocInMessage")
+}
+
+
+model List {
+  id            String   @id @default(cuid())
+  title         String
+  items         Json
+  createdBy     User     @relation(fields: [userId], references: [id])
+  userId        String
+
+  workspace     Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId   String
+
+  createdAt     DateTime @default(now())
+  messages      Message[] @relation("ListInMessage")
+}

@@ -1,6 +1,6 @@
 "use client"
 import { Users } from "lucide-react";
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 import { useRouter } from "next/navigation";
 
 const Page = () => {
@@ -9,6 +9,13 @@ const Page = () => {
   const [teamName, setTeamName] = useState("Tanveer's Workspace");
   const [teamDescription, setTeamDescription] = useState("Workspace Description");
   const [teamInvite, setTeamInvite] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      navigate.push('/login');
+    }
+  }, [navigate])
 
   const handleCreateTeam = async() => {
       const token  = localStorage.getItem('authToken');

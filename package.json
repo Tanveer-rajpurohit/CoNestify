@@ -14,7 +14,7 @@
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "tailwindcss": "^4.1.7",
-    "turbo": "^2.5.0",
+    "turbo": "^2.5.3",
     "typescript": "5.8.2"
   },
   "engines": {
@@ -39,10 +39,14 @@
     "@editorjs/marker": "^1.4.0",
     "@editorjs/quote": "^2.7.6",
     "@editorjs/table": "^2.4.5",
+    "@react-oauth/google": "^0.12.2",
     "@tailwindcss/postcss": "^4.1.7",
     "@tiptap/extension-code-block": "^2.12.0",
     "@tiptap/pm": "^2.12.0",
     "@tldraw/tldraw": "^3.13.1",
+    "google-auth-library": "^9.15.1",
+    "jwt-decode": "^4.0.0",
+    "next": "^14.2.15",
     "react-router-dom": "^7.6.1"
   }
 }
