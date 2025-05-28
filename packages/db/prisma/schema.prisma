@@ -33,6 +33,8 @@ model User {
 model Workspace {
   id         String   @id @default(cuid())
   name       String
+  description String?
+  inviteLink String? @unique
   createdAt  DateTime @default(now())
   members    WorkspaceMember[]
   channels   Channel[]
@@ -56,6 +58,8 @@ model WorkspaceMember {
 model Channel {
   id           String     @id @default(cuid())
   name         String
+  description  String?
+  inviteLink   String? @unique
   isPrivate    Boolean    @default(false)
   workspace    Workspace  @relation(fields: [workspaceId], references: [id])
   workspaceId  String
