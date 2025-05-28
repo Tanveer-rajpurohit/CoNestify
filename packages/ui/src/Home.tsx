@@ -1,27 +1,45 @@
-import NavBar from "./components/NavBar";
+import { FilePenLine } from "lucide-react";
+import HeroSection from "./components/HeroSection";
+import { useRouter } from "next/navigation";
 
 const Home = () => {
+  const router = useRouter();
+  const handelnavigate = () => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      router.push("/dashboard");
+    } else {
+      router.push("/login");
+    }
+  };
   return (
-    <div className="w-full min-h-screen">
-      
-      <div className="relative w-full h-[100vh] bg-[#F1F1F1] px-2 py-1 font-mono overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 z-0 bg-white bg-[radial-gradient(100%_50%_at_50%_0%,rgba(0,163,255,0.13)_0%,rgba(0,163,255,0)_50%,rgba(0,163,255,0)_100%)]"></div>
-
-        
-        <div className="relative z-10">
-          <NavBar />
-          
-
-          
-        </div>
+    <>
+      <div
+        className="w-full bg-[#ffffff] text-[#171717] min-h-screen py-8 px-6"
+        style={{
+          fontFamily: "Poppins",
+        }}
+      >
+        <nav className="w-full flex justify-between items-baseline px-5 py-1">
+          <div className="flex items-center justify-center gap-2 ">
+            <FilePenLine className="w-5 h-5 text-gray-800" />
+            <h2 className="text-lg ">CoNestify</h2>
+          </div>
+          <div
+            onClick={(e) => {
+              e.preventDefault();
+              handelnavigate();
+            }}
+            className=""
+          >
+            <button className="px-6 py-3 bg-[#007A5A] text-[#171717] font-semibold rounded-md hover:bg-[#32947A] transition-colors duration-300 shadow-lg text-white">
+              Try CoNestify
+            </button>
+          </div>
+        </nav>
+        <HeroSection />
       </div>
-
-     
-
-      
-    </div>
+    </>
   );
 };
-
 export default Home;

@@ -1,3 +1,5 @@
+"use client";
+
 import Home from "@repo/ui/Home";
 
 const page = () => {
