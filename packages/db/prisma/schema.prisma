@@ -20,6 +20,7 @@ model User {
   email      String   @unique
   name       String?
   image      String?
+  Invitations Json[]
   createdAt  DateTime @default(now())
   members    WorkspaceMember[]
   sentMessages     Message[] @relation("SentMessages")
@@ -28,11 +29,13 @@ model User {
   canvases   CanvasDoc[]
   lists      List[]
   uploadedFiles File[] // Relation to File model for uploadedBy
+  invitations     Invitation[]  @relation("UserInvitations")
 }
+
 
 model Workspace {
   id         String   @id @default(cuid())
-  name       String
+  name       String   @unique
   description String?
   inviteLink String? @unique
   createdAt  DateTime @default(now())
@@ -41,6 +44,22 @@ model Workspace {
   canvases   CanvasDoc[]
   docs       Doc[]
   lists      List[]
+  invitations Invitation[]
+}
+
+
+model Invitation {
+  id          String   @id @default(cuid())
+  email       String   
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  inviteTo    User? @relation("UserInvitations", fields: [inviteToEmail], references: [email])
+  inviteToEmail  String? 
+  status      String   // "pending", "accepted", "declined"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([email, workspaceId]) // Ensure unique invitation per email in a workspace
 }
 
 model WorkspaceMember {

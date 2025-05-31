@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Permanent_Marker, Nothing_You_Could_Do,Balthazar,Poppins } from "next/font/google"; // Import Google Font
-import { SessionProvider } from 'next-auth/react'
 import "./globals.css";
 
 const geistSans = localFont({
@@ -54,9 +53,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${permanentMarker.variable} ${NothingYouCouldDo.variable}  ${balthazarFont.variable} ${poppinsFont.variable} `}
       >
-      <SessionProvider>
+     
           {children}
-        </SessionProvider>
       </body>
     </html>
   );
