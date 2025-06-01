@@ -1,92 +1,78 @@
 "use client";
 import React from "react";
-import {  Plus, Search } from "lucide-react";
-import { JSX } from "react/jsx-dev-runtime";
-import { fileTypeData } from "@data/FileIcon"
+import { Brush, Plus, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-
-
-type FileType = "canvas" | "document" | "list";
-
-export type ViewedDate = "today" | "yesterday" | "older";
-
-export interface FileItem {
-  id: string;
-  name: string;
-  type: FileType;
-  viewedDate: ViewedDate;
-  createdDate: Date;
-  desc: string;
-  thumbnail?: string;
-  sharedBy?: string;
-}
-
-export interface FileTypeMeta {
-  icon: JSX.Element;
-  bg: string;
-}
-const allFiles: FileItem[] = [
-  {
-    id: "1",
-    name: "Canvas Design",
-    type: "canvas",
-    viewedDate: "today",
-    createdDate: new Date(2023, 3, 18),
-    desc: "A design for the new project",
-    sharedBy: "Slackbot",
-  },
-  {
-    id: "2",
-    name: "UX Sketch Design",
-    type: "canvas",
-    viewedDate: "yesterday",
-    createdDate: new Date(2023, 3, 14),
-    desc: "A design for the new project",
-    sharedBy: "tan",
-  },
-  {
-
-    id: "3",
-    name: "Wireframe Prototype",
-    type: "canvas",
-    viewedDate: "older",
-    createdDate: new Date(2023, 2, 10),
-    desc: "Initial wireframe for the app",
-    sharedBy: "designer",
-  },
-  {
-
-    id: "4",
-    name: "New Canvas",
-    type: "canvas",
-    viewedDate: "today",
-    createdDate: new Date(),
-    desc: "A new canvas for the project",
-    sharedBy: "user",
-  }
-];
-
-
+import { useGetFileList } from "app/hook/useGetFileList";
+import { selectedWorkspaceId } from "@context/workspaceContext";
+import { RingLoader } from "react-spinners";
+import { useCreateFile } from "app/hook/useCreateFile";
+import { X } from "lucide-react";
 
 interface AllCanvasProps {
   onFileClick: (fileId: string, workspaceId: number) => void;
+}
+
+export interface CanvasFile {
+  id: string;
+  title: string;
+  desc?: string;
+  createdAt: string; // ISO string from backend
+  updatedAt: string;
+  userId: string;
+  workspaceId: string;
 }
 
 const AllCanvas = ({ onFileClick }: AllCanvasProps) => {
   const [isSearchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreate, setIsCreate] = useState(false);
+  const [files, setFiles] = useState<CanvasFile[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newCanvasName, setNewCanvasName] = useState("");
 
+  const { getCanvasList, loading } = useGetFileList();
+  const workspaceId = selectedWorkspaceId();
+  const { loading: isCreating, createCanvas } = useCreateFile();
+
+  useEffect(() => {
+    if (workspaceId.value) {
+      getCanvasList(workspaceId.value).then((data) => {
+        if (Array.isArray(data)) setFiles(data);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaceId.value]);
 
   const filterFiles = () => {
-    const filtered = allFiles.filter((file) =>
-      file.name.toLowerCase().includes(searchQuery.toLowerCase())
+    return files.filter((file) =>
+      file.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
-    return filtered;
   };
 
   const Files = filterFiles();
+
+  // Fetch canvases
+  const fetchCanvases = () => {
+    if (workspaceId.value) {
+      getCanvasList(workspaceId.value).then((data) => {
+        if (Array.isArray(data)) setFiles(data);
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchCanvases();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaceId.value]);
+
+  const handleCreateCanvas = async () => {
+    if (!newCanvasName.trim() || !workspaceId.value) return;
+    await createCanvas(workspaceId.value, newCanvasName.trim());
+    setShowCreateModal(false);
+    setNewCanvasName("");
+    fetchCanvases();
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -117,25 +103,12 @@ const AllCanvas = ({ onFileClick }: AllCanvasProps) => {
           <h2 className="text-xl font-semibold text-gray-800">All Canvases</h2>
           <div
             ref={dropdownRef}
-            onClick={() => {
-              setIsCreate(!isCreate);
-            }}
-            className="create flex items-center justify-center gap-1 bg-[#007A5A] px-3 py-1 rounded-md transition-colors text-[#ffffff] hover:bg-[#007A5A]/80 cursor-pointer"
+            onClick={() => setShowCreateModal(true)}
+            className={`create flex items-center justify-center gap-1 bg-[#007A5A] px-3 py-1 rounded-md transition-colors text-[#ffffff] hover:bg-[#007A5A]/80 cursor-pointer ${isCreating ? "opacity-60 pointer-events-none" : ""}`}
           >
             <Plus className="w-4 h-4" />
             <h2 className="text-md">New</h2>
           </div>
-
-          {isCreate && (
-            <div className="absolute right-0 top-[80%] py-2 bg-[#F8F8F8] rounded-lg flex flex-col items-start justify-start w-56 border border-[#d2d1d1] shadow-lg z-10 text-[#1f1f1fe8]">
-              <div className="px-5 hover:bg-[#837b73] w-full">
-                <h4>New Canvas</h4>
-              </div>
-              <div className="px-5 hover:bg-[#837b73] w-full">
-                <h4>Start From a Template</h4>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Search Bar */}
@@ -155,31 +128,36 @@ const AllCanvas = ({ onFileClick }: AllCanvasProps) => {
 
         {/* file */}
         <div className="mt-4 flex flex-col gap-5">
-          {Object.entries(Files).length > 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center h-32">
+              <RingLoader color="#007A5A" size={40} />
+              <p className="text-gray-500 mt-2">Loading all canvas files...</p>
+            </div>
+          ) : Files.length > 0 ? (
             <div className="mb-6">
               <div className="rounded-lg bg-white border border-gray-200 flex flex-col shadow-sm overflow-hidden">
                 {Files.map((file) => (
                   <div
                     key={file.id}
-                    onClick={() => onFileClick(file.id, 1)} // Assuming workspaceId is 1 for now
+                    onClick={() =>
+                      onFileClick(file.id, Number(file.workspaceId))
+                    }
                     className="px-4 py-3 flex items-center gap-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
                   >
                     <div
-                      className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 ${
-                        fileTypeData[file.type].bg
-                      } shadow-sm`}
+                      className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 bg-[#1CB6EB] shadow-sm`}
                     >
                       <div className="scale-125">
-                        {fileTypeData[file.type].icon}
+                        <Brush className="w-4 h-4 text-white" />
                       </div>
                     </div>
                     <div className="flex flex-col gap-1 flex-grow">
                       <span className="truncate text-base font-medium text-gray-800">
-                        {file.name}
+                        {file.title}
                       </span>
-                      <span className="truncate text-xs text-gray-500">
-                        {file.sharedBy && `Shared by ${file.sharedBy}`} ·{" "}
-                        {file.createdDate.toLocaleDateString()}
+                      
+                      <span className="truncate text-xs text-gray-400">
+                        {new Date(file.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -196,6 +174,40 @@ const AllCanvas = ({ onFileClick }: AllCanvasProps) => {
             </div>
           )}
         </div>
+
+        {showCreateModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-sm flex flex-col items-center relative">
+              <button
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-700"
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setNewCanvasName("");
+                }}
+                disabled={isCreating}
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <h2 className="text-xl font-semibold mb-4">Create New Canvas</h2>
+              <input
+                type="text"
+                className="border border-gray-300 rounded px-3 py-2 w-full mb-4"
+                placeholder="Enter canvas name"
+                value={newCanvasName}
+                onChange={(e) => setNewCanvasName(e.target.value)}
+                disabled={isCreating}
+                autoFocus
+              />
+              <button
+                className={`bg-[#007A5A] text-white px-4 py-2 rounded w-full font-medium transition-colors ${isCreating ? "opacity-60 cursor-not-allowed" : "hover:bg-[#00664a]"}`}
+                onClick={handleCreateCanvas}
+                disabled={isCreating || !newCanvasName.trim()}
+              >
+                {isCreating ? "Creating..." : "Create"}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

@@ -45,6 +45,7 @@ model Workspace {
   docs       Doc[]
   lists      List[]
   invitations Invitation[]
+  message     Message[]
 }
 
 
@@ -99,6 +100,8 @@ model Message {
   receiver    User?    @relation("ReceivedMessages", fields: [receiverId], references: [id])
   receiverId  String?
 
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
   content     String?
   type        String   // "text", "file", "canvas", "doc", etc.
   fileId      String?  // For file reference

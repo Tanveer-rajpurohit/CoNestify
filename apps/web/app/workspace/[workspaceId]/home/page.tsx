@@ -1,20 +1,22 @@
 "use client"
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import WorkspaceLayout from "../components/WorkspaceLayout";
 import Home from "./components/Home";
 import HomeSidebar from "./components/HomeSidebar";
+import { selectedWorkspaceId } from "@context/workspaceContext";
 
 const WorkspacePage = () => {
-  const [workspaceId, setWorkspaceId] = useState<string | null>(null);
+  const workspaceId = selectedWorkspaceId();
 
   useEffect(() => {
     const pathParts = window.location.pathname.split('/');
     const id = pathParts[2] ?? null;
-    setWorkspaceId(id);
+    workspaceId.set(id as string);
     console.log("Workspace ID:", id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log("Workspace ID from state:", workspaceId);
+  console.log("Workspace ID from context:", workspaceId.value);
 
   return (
     <WorkspaceLayout>

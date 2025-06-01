@@ -1,14 +1,28 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { selectedCanvasType } from "@context/CanvasContext";
 import AllCanvas from "./AllCanvas";
-import CreatedByYou from "./CreatedByYou";
+import { selectedWorkspaceId } from "@context/workspaceContext";
+
+
 
 const Canvas = () => {
   const { value: fileType } = selectedCanvasType();
   const onFileClick = (fileId: string, workspaceId: number) => {
     window.location.href = `/workspace/${workspaceId}/canvas/${fileId}`;
   };
+
+  const workspaceId = selectedWorkspaceId();
+
+  useEffect(() => {
+      if (!workspaceId.value) {
+        const pathParts = window.location.pathname.split("/");
+        const id = pathParts[2] ?? null;
+        workspaceId.set(id as string);
+        console.log("Workspace ID:", id);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
   return (
     <>
       <div className="w-full min-h-screen relative">
@@ -16,7 +30,7 @@ const Canvas = () => {
 
         <div className="relative z-10 h-full">
           {fileType === "All canvases" && <AllCanvas onFileClick={onFileClick} />}
-          {fileType === "Created by you" && <CreatedByYou onFileClick={onFileClick} />}
+          {/* {fileType === "Created by you" && <CreatedByYou onFileClick={onFileClick} />} */}
         </div>
       </div>
     </>
