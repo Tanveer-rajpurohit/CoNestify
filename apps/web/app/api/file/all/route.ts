@@ -1,6 +1,6 @@
 import { prisma } from "@repo/db";
 import { NextRequest, NextResponse } from "next/server";
-export const GET = async (req: NextRequest): Promise<NextResponse> => {
+export const POST = async (req: NextRequest): Promise<NextResponse> => {
   const { workspaceId } = await req.json();
   const userId = req.headers.get("x-user-id");
 
@@ -15,6 +15,7 @@ export const GET = async (req: NextRequest): Promise<NextResponse> => {
           id: true,
           title: true,
           createdAt: true,
+          updatedAt: true,
         },
       }),
       prisma.canvasDoc.findMany({
@@ -23,6 +24,8 @@ export const GET = async (req: NextRequest): Promise<NextResponse> => {
           id: true,
           title: true,
           createdAt: true,
+          updatedAt: true,
+
         },
       }),
       prisma.list.findMany({
@@ -31,6 +34,8 @@ export const GET = async (req: NextRequest): Promise<NextResponse> => {
           id: true,
           title: true,
           createdAt: true,
+          updatedAt: true,
+
         },
       }),
       prisma.file.findMany({

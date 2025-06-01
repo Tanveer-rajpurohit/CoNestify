@@ -15,163 +15,161 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(cuid())
-  googleId   String   @unique
-  email      String   @unique
-  name       String?
-  image      String?
-  Invitations Json[]
-  createdAt  DateTime @default(now())
-  members    WorkspaceMember[]
-  sentMessages     Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
-  docs       Doc[]
-  canvases   CanvasDoc[]
-  lists      List[]
-  uploadedFiles File[] // Relation to File model for uploadedBy
-  invitations     Invitation[]  @relation("UserInvitations")
+  id               String            @id @default(cuid())
+  googleId         String            @unique
+  email            String            @unique
+  name             String?
+  image            String?
+  Invitations      Json[]
+  createdAt        DateTime          @default(now())
+  members          WorkspaceMember[]
+  sentMessages     Message[]         @relation("SentMessages")
+  receivedMessages Message[]         @relation("ReceivedMessages")
+  docs             Doc[]
+  canvases         CanvasDoc[]
+  lists            List[]
+  uploadedFiles    File[] // Relation to File model for uploadedBy
+  invitations      Invitation[]      @relation("UserInvitations")
 }
 
-
 model Workspace {
-  id         String   @id @default(cuid())
-  name       String   @unique
+  id          String            @id @default(cuid())
+  name        String            @unique
   description String?
-  inviteLink String? @unique
-  createdAt  DateTime @default(now())
-  members    WorkspaceMember[]
-  channels   Channel[]
-  canvases   CanvasDoc[]
-  docs       Doc[]
-  lists      List[]
+  inviteLink  String?           @unique
+  createdAt   DateTime          @default(now())
+  members     WorkspaceMember[]
+  channels    Channel[]
+  canvases    CanvasDoc[]
+  docs        Doc[]
+  lists       List[]
   invitations Invitation[]
   message     Message[]
 }
 
-
 model Invitation {
-  id          String   @id @default(cuid())
-  email       String   
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
-  workspaceId String
-  inviteTo    User? @relation("UserInvitations", fields: [inviteToEmail], references: [email])
-  inviteToEmail  String? 
-  status      String   // "pending", "accepted", "declined"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String    @id @default(cuid())
+  email         String
+  workspace     Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId   String
+  inviteTo      User?     @relation("UserInvitations", fields: [inviteToEmail], references: [email])
+  inviteToEmail String?
+  status        String // "pending", "accepted", "declined"
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@unique([email, workspaceId]) // Ensure unique invitation per email in a workspace
 }
 
 model WorkspaceMember {
-  id          String   @id @default(cuid())
-  user        User     @relation(fields: [userId], references: [id])
+  id          String    @id @default(cuid())
+  user        User      @relation(fields: [userId], references: [id])
   userId      String
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
   workspaceId String
-  role        String   // "admin", "member"
-  joinedAt    DateTime @default(now())
+  role        String // "admin", "member"
+  joinedAt    DateTime  @default(now())
 
   @@unique([userId, workspaceId])
 }
 
 model Channel {
-  id           String     @id @default(cuid())
-  name         String
-  description  String?
-  inviteLink   String? @unique
-  isPrivate    Boolean    @default(false)
-  workspace    Workspace  @relation(fields: [workspaceId], references: [id])
-  workspaceId  String
-  messages     Message[]
-  files        File[]
-  createdAt    DateTime   @default(now())
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  inviteLink  String?   @unique
+  isPrivate   Boolean   @default(false)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
+  messages    Message[]
+  files       File[]
+  createdAt   DateTime  @default(now())
 }
 
 model Message {
-  id          String   @id @default(cuid())
-  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
-  senderId    String
+  id       String @id @default(cuid())
+  sender   User   @relation("SentMessages", fields: [senderId], references: [id])
+  senderId String
 
   // either in a channel OR personal (receiverId not null)
-  channel     Channel? @relation(fields: [channelId], references: [id])
-  channelId   String?
+  channel   Channel? @relation(fields: [channelId], references: [id])
+  channelId String?
 
-  receiver    User?    @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  receiverId  String?
+  receiver   User?   @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiverId String?
 
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
   workspaceId String
   content     String?
-  type        String   // "text", "file", "canvas", "doc", etc.
-  fileId      String?  // For file reference
-  docId       String?  // For doc
-  doc         Doc?     @relation("DocInMessage", fields: [docId], references: [id])
+  type        String // "text", "file", "canvas", "doc", etc.
+  fileId      String? // For file reference
+  docId       String? // For doc
+  doc         Doc?      @relation("DocInMessage", fields: [docId], references: [id])
   canvasId    String?
   listId      String?
 
-  list        List?     @relation("ListInMessage", fields: [listId], references: [id])
+  list List? @relation("ListInMessage", fields: [listId], references: [id])
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  canvas      CanvasDoc? @relation("CanvasInMessage", fields: [canvasId], references: [id])
+  canvas CanvasDoc? @relation("CanvasInMessage", fields: [canvasId], references: [id])
 }
 
-
 model File {
-  id          String   @id @default(cuid())
-  name        String
-  url         String
-  type        String   // pdf, image, etc.
-  uploadedBy  User     @relation(fields: [userId], references: [id])
-  userId      String
+  id         String @id @default(cuid())
+  name       String
+  url        String
+  type       String // pdf, image, etc.
+  uploadedBy User   @relation(fields: [userId], references: [id])
+  userId     String
 
-  channel     Channel  @relation(fields: [channelId], references: [id])
-  channelId   String
+  channel   Channel @relation(fields: [channelId], references: [id])
+  channelId String
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model CanvasDoc {
-  id            String   @id @default(cuid())
-  title         String?
-  data          Json
-  createdBy     User     @relation(fields: [userId], references: [id])
-  userId        String
+  id        String  @id @default(cuid())
+  title     String?
+  data      Json
+  createdBy User    @relation(fields: [userId], references: [id])
+  userId    String
 
-  workspace     Workspace @relation(fields: [workspaceId], references: [id])
-  workspaceId   String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
 
-  createdAt     DateTime @default(now())
-  messages      Message[] @relation("CanvasInMessage")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  messages  Message[] @relation("CanvasInMessage")
 }
-
 
 model Doc {
-  id            String   @id @default(cuid())
-  title         String?
-  content       Json
-  createdBy     User     @relation(fields: [userId], references: [id])
-  userId        String
+  id        String  @id @default(cuid())
+  title     String?
+  content   Json
+  createdBy User    @relation(fields: [userId], references: [id])
+  userId    String
 
-  workspace     Workspace @relation(fields: [workspaceId], references: [id])
-  workspaceId   String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
 
-  createdAt     DateTime @default(now())
-  messages      Message[] @relation("DocInMessage")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  messages  Message[] @relation("DocInMessage")
 }
 
-
 model List {
-  id            String   @id @default(cuid())
-  title         String
-  items         Json
-  createdBy     User     @relation(fields: [userId], references: [id])
-  userId        String
+  id        String @id @default(cuid())
+  title     String
+  items     Json
+  createdBy User   @relation(fields: [userId], references: [id])
+  userId    String
 
-  workspace     Workspace @relation(fields: [workspaceId], references: [id])
-  workspaceId   String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId String
 
-  createdAt     DateTime @default(now())
-  messages      Message[] @relation("ListInMessage")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  messages  Message[] @relation("ListInMessage")
 }

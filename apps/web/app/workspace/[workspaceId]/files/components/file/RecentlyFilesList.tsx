@@ -1,93 +1,35 @@
 "use client";
+import { selectedWorkspaceId } from "@context/workspaceContext";
+import { useGetFileList } from "app/hook/useGetFileList";
 import { Search, Brush, ListTodo, FileText } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { JSX } from "react/jsx-dev-runtime";
+import { RingLoader } from "react-spinners";
 
-type FileType = "canvas" | "document" | "list";
-
-export type ViewedDate = "today" | "yesterday" | "older";
-
-export interface FileItem {
+interface RecentFile {
   id: string;
   name: string;
-  type: FileType;
-  viewedDate: ViewedDate;
-  createdDate: Date;
-  desc: string;
-  thumbnail?: string;
+  type: "canvas" | "doc" | "list";
+  updatedAt: string;
+  createdAt: string;
+  desc?: string;
+  workspaceId: string;
   sharedBy?: string;
 }
 
-export interface FileTypeMeta {
-  icon: JSX.Element;
-  bg: string;
+interface RecentlyFilesListProps {
+  onFileClick: (
+    fileId: string,
+    workspaceId: number,
+    fileType: RecentFile["type"]
+  ) => void;
 }
-const allFiles: FileItem[] = [
-  {
-    id: "1",
-    name: "Canvas Design",
-    type: "canvas",
-    viewedDate: "today",
-    createdDate: new Date(2023, 3, 18),
-    desc: "A design for the new project",
-    thumbnail: "/placeholder.svg?height=200&width=300",
-    sharedBy: "Slackbot",
-  },
-  {
-    id: "2",
-    name: "To-do Doc",
-    type: "document",
-    viewedDate: "today",
-    createdDate: new Date(2023, 3, 18),
-    desc: "A design for the new project",
-    sharedBy: "Tanveer Singh",
-  },
-  {
-    id: "3",
-    name: "Task List",
-    type: "list",
-    viewedDate: "yesterday",
-    createdDate: new Date(2023, 3, 14),
-    desc: "A design for the new project",
-    sharedBy: "Tanveer Singh",
-  },
-  {
-    id: "4",
-    name: "UX Sketch Design",
-    type: "canvas",
-    viewedDate: "yesterday",
-    createdDate: new Date(2023, 3, 14),
-    desc: "A design for the new project",
-    thumbnail: "/placeholder.svg?height=200&width=300",
-    sharedBy: "tan",
-  },
-  {
-    id: "5",
-    name: "Notes Draft",
-    type: "document",
-    viewedDate: "yesterday",
-    createdDate: new Date(2023, 3, 14),
-    desc: "A design for the new project",
-    thumbnail: "/placeholder.svg?height=200&width=300",
-    sharedBy: "Tanveer Singh",
-  },
-  {
-    id: "6",
-    name: "Client Table",
-    type: "list",
-    viewedDate: "today",
-    createdDate: new Date(2023, 3, 18),
-    desc: "A design for the new project",
-    sharedBy: "Tanveer Singh",
-  },
-];
-// Icons for file types
-const fileTypeData: Record<FileType, FileTypeMeta> = {
+
+const fileTypeData = {
   canvas: {
     icon: <Brush className="w-4 h-4 text-white" />,
     bg: "bg-[#1CB6EB]",
   },
-  document: {
+  doc: {
     icon: <FileText className="w-4 h-4 text-white" />,
     bg: "bg-[#E19B06]",
   },
@@ -95,10 +37,21 @@ const fileTypeData: Record<FileType, FileTypeMeta> = {
     icon: <ListTodo className="w-4 h-4 text-white" />,
     bg: "bg-[#7D7DE3]",
   },
+  unknown: {
+    icon: <FileText className="w-4 h-4 text-white" />,
+    bg: "bg-gray-400",
+  },
 };
 
-interface RecentlyFilesListProps {
-  onFileClick: (fileId: string, workspaceId: number, fileType: FileType) => void;
+function getViewedDate(updatedAt: string) {
+  const date = new Date(updatedAt);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const fileDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diff = today.getTime() - fileDay.getTime();
+  if (diff === 0) return "today";
+  if (diff === 86400000) return "yesterday";
+  return "older";
 }
 
 const RecentlyFilesList = ({ onFileClick }: RecentlyFilesListProps) => {
@@ -106,39 +59,42 @@ const RecentlyFilesList = ({ onFileClick }: RecentlyFilesListProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const filterFiles = () => {
-    const filtered = allFiles.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    return filtered;
-  };
+  const { getAllFileList, loading } = useGetFileList();
+  const workspaceId = selectedWorkspaceId();
 
-  // Sort files based on selected sort option
-  const sortFiles = (files: FileItem[]) => {
-    const sortedFiles = [...files];
+  const [files, setFiles] = useState<RecentFile[]>([]);
 
-    const priority: Record<ViewedDate, number> = {
-      today: 1,
-      yesterday: 2,
-      older: 3,
-    };
-    sortedFiles.sort(
-      (a, b) => (priority[a.viewedDate] ?? 0) - (priority[b.viewedDate] ?? 0)
+  useEffect(() => {
+    if (workspaceId.value) {
+      getAllFileList(workspaceId.value).then((data) => {
+        if (Array.isArray(data)) setFiles(data);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaceId.value]);
+
+  // Filter and sort files
+  const filteredFiles = files
+    .filter((file) =>
+      file.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
 
-    return sortedFiles;
-  };
-
-  const filteredAndSortedFiles = sortFiles(filterFiles());
-
-  const groupedFiles = filteredAndSortedFiles.reduce(
+  // Group files by viewed date
+  const groupedFiles = filteredFiles.reduce(
     (acc, file) => {
-      acc[file.viewedDate] = acc[file.viewedDate] || [];
-      (acc[file.viewedDate] = acc[file.viewedDate] || []).push(file);
+      const viewedDate = getViewedDate(file.updatedAt);
+      acc[viewedDate] = acc[viewedDate] || [];
+      acc[viewedDate].push(file);
       return acc;
     },
-    {} as Record<string, FileItem[]>
+    {} as Record<string, RecentFile[]>
   );
 
-  // Outside click listener
+  // Outside click listener for search
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -164,7 +120,7 @@ const RecentlyFilesList = ({ onFileClick }: RecentlyFilesListProps) => {
       </h2>
 
       {/* Search Bar */}
-     <div
+      <div
         onClick={() => setSearchOpen(true)}
         className="rounded-lg mb-6 bg-white border border-gray-300 px-4 py-1.5 flex items-center justify-between cursor-text hover:shadow-md transition-shadow"
       >
@@ -178,48 +134,65 @@ const RecentlyFilesList = ({ onFileClick }: RecentlyFilesListProps) => {
         <Search className="w-5 h-5 text-gray-500" />
       </div>
 
+      {/* Loading Spinner */}
+      {loading && (
+        <div className="flex flex-col items-center justify-center h-32">
+          <RingLoader color="#007A5A" size={40} />
+          <p className="text-gray-500 mt-2">Loading files...</p>
+        </div>
+      )}
 
       {/* File Sections */}
       <div className="mt-4 flex flex-col gap-5">
-        {Object.entries(groupedFiles).length > 0 ? (
+        {!loading && Object.entries(groupedFiles).length > 0 ? (
           Object.entries(groupedFiles).map(([date, files]) => (
             <div key={date} className="mb-6">
               <h3 className="text-sm font-semibold text-gray-600 mb-3 capitalize">
                 {date}
               </h3>
-
-                <div className="rounded-lg bg-white border border-gray-200 flex flex-col shadow-sm overflow-hidden">
-                  {files.map((file) => (
+              <div className="rounded-lg bg-white border border-gray-200 flex flex-col shadow-sm overflow-hidden">
+                {files.map((file) => {
+                  const typeKey = fileTypeData[file.type]
+                    ? file.type
+                    : "unknown";
+                  return (
                     <div
-                    onClick={() => onFileClick(file.id, 1, file.type)} // Assuming workspaceId is 1 for this example
+                      onClick={() =>
+                        onFileClick(
+                          file.id,
+                          Number(file.workspaceId),
+                          file.type
+                        )
+                      }
                       key={file.id}
                       className="px-4 py-3 flex items-center gap-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
                     >
                       <div
                         className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 ${
-                          fileTypeData[file.type].bg
+                          fileTypeData[typeKey].bg
                         } shadow-sm`}
                       >
                         <div className="scale-125">
-                          {fileTypeData[file.type].icon}
+                          {fileTypeData[typeKey].icon}
                         </div>
                       </div>
+
                       <div className="flex flex-col gap-1 flex-grow">
                         <span className="truncate text-base font-medium text-gray-800">
                           {file.name}
                         </span>
                         <span className="truncate text-xs text-gray-500">
-                          {file.sharedBy && `Shared by ${file.sharedBy}`} ·{" "}
-                          {file.createdDate.toLocaleDateString()}
+                          {file.sharedBy && `Shared by ${file.sharedBy}`}{" "}
+                          {new Date(file.updatedAt).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              
+                  );
+                })}
+              </div>
             </div>
           ))
-        ) : (
+        ) : !loading ? (
           <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-gray-200 shadow-sm">
             <Search className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-lg">No files match your search criteria</p>
@@ -227,7 +200,7 @@ const RecentlyFilesList = ({ onFileClick }: RecentlyFilesListProps) => {
               Try adjusting your filters or search term
             </p>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

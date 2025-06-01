@@ -1,55 +1,53 @@
-"use client"
-import { type FileItem } from "./AllFilesList"
-import { fileTypeData } from "@data/FileIcon"
+"use client";
+import { type FileItem, type FileType } from "./AllFilesList";
+import { fileTypeData } from "./AllFilesList";
+
 
 interface FileCardProps {
-  file: FileItem
+  file: FileItem;
+  onFileClick: (fileId: string, workspaceId: number, fileType: FileType) => void;
 }
 
-const FileCard = ({ file }: FileCardProps) => {
+const FileCard = ({ file,onFileClick }: FileCardProps) => {
+  const typeKey = fileTypeData[file.type] ? file.type : "unknown";
+  let createdDate = "No date";
+  try {
+    createdDate = file.createdAt
+      ? new Date(file.createdAt).toLocaleDateString()
+      : "No date";
+  } catch {
+    createdDate = "No date";
+  }
+
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group">
-      {/* Thumbnail or Preview */}
-      <div className="h-40 bg-gray-100 relative overflow-hidden">
-        {file.thumbnail ? (
-          <img
-            src={file.thumbnail || "/placeholder.svg"}
-            alt={file.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-50">
-            <div
-              className={`w-16 h-16 rounded-md flex items-center justify-center ${fileTypeData[file.type].bg} shadow-md`}
-            >
-              <div className="scale-150">{fileTypeData[file.type].icon}</div>
-            </div>
-          </div>
-        )}
+    <div
+      onClick={() =>
+        onFileClick(file.id, Number(file.workspaceId), file.type as FileType)
+      }
+      className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex flex-col items-center py-6"
+    >
+      {/* Icon Badge */}
+      <div
+        className={`w-16 h-16 rounded-xl flex items-center justify-center ${fileTypeData[typeKey].bg} shadow-lg mb-4`}
+      >
+        <div className="scale-150">{fileTypeData[typeKey].icon}</div>
       </div>
 
       {/* File Info */}
-      <div className="p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div
-            className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${fileTypeData[file.type].bg} shadow-sm`}
-          >
-            {fileTypeData[file.type].icon}
-          </div>
-          <h3 className="font-semibold text-gray-800 truncate">{file.name}</h3>
-        </div>
-        <div className="text-xs text-gray-500 flex items-center gap-1">
-          {file.sharedBy && (
-            <>
-              <span>Shared by {file.sharedBy}</span>
-              <span className="inline-block w-1 h-1 bg-gray-300 rounded-full"></span>
-            </>
-          )}
-          <span>{file.createdDate.toLocaleDateString()}</span>
-        </div>
+      <h3 className="font-semibold text-gray-900 text-base text-center truncate mb-1">
+        {file.name}
+      </h3>
+      <div className="flex items-center justify-center gap-2 text-xs text-gray-500 mb-1">
+        <span>{createdDate}</span>
+      </div>
+      <div className="flex items-center justify-center gap-1 mt-1">
+        <span
+          className={`w-2 h-2 rounded-full ${fileTypeData[typeKey].bg}`}
+        ></span>
+        <span className="capitalize text-xs">{typeKey}</span>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FileCard
+export default FileCard;
