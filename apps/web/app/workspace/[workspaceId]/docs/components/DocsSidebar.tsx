@@ -1,6 +1,6 @@
 "use client";
 
-import {  Files, UserRound } from "lucide-react";
+import {  Files } from "lucide-react";
 import { selectedDocsType } from "@context/DocsContext";
 
 const DocsSidebar = () => {
@@ -9,7 +9,6 @@ const DocsSidebar = () => {
 
     const DocsTypeData = [
         { name: "All Docs", icon: <Files className="w-4 h-4" /> },
-        { name: "Created by you", icon: <UserRound className="w-4 h-4" /> },
     ];
 
     return (

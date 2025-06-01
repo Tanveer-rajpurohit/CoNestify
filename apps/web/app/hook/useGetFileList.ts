@@ -50,8 +50,8 @@ export const useGetFileList = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/workspace/file/docs/getList`, {
-        method: "GET",
+      const res = await fetch(`/api/file/docs/getList`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -93,8 +93,8 @@ export const useGetFileList = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/workspace/file/list/getList`, {
-        method: "GET",
+      const res = await fetch(`/api/file/list/getList`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -136,8 +136,8 @@ export const useGetFileList = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/workspace/file/all`, {
-        method: "GET",
+      const res = await fetch(`/api/file/all`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,

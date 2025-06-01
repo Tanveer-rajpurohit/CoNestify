@@ -15,8 +15,8 @@ interface AllCanvasProps {
 export interface CanvasFile {
   id: string;
   title: string;
-  desc?: string;
-  createdAt: string; // ISO string from backend
+  data: string; 
+  createdAt: string; 
   updatedAt: string;
   userId: string;
   workspaceId: string;

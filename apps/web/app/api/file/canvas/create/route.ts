@@ -12,6 +12,17 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
     if(!workspaceId || !name){
         return NextResponse.json({ error: "workspaceId and name is required" }, { status: 400 });
     }
+    //check if in that workspace file with that name already exists
+    const existingCanvas = await prisma.canvasDoc.findFirst({
+        where: {
+            workspaceId: workspaceId,
+            title: name,
+            userId: userId
+        }
+    });
+    if (existingCanvas) {
+        return NextResponse.json({ error: "Canvas with that name already exists in this workspace" }, { status: 400 });
+    }
 
     try{
 

@@ -1,197 +1,208 @@
-import {  Plus, Search } from "lucide-react";
+"use client";
+import { Plus, Search, FileText, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { JSX } from "react/jsx-dev-runtime";
-import { fileTypeData } from "../../Data/FileIcon"
+import { RingLoader } from "react-spinners";
+import { useGetFileList } from "app/hook/useGetFileList";
+import { useCreateFile } from "app/hook/useCreateFile";
+import { selectedWorkspaceId } from "@context/workspaceContext";
 
-type FileType = "canvas" | "document" | "list";
-
-export type ViewedDate = "today" | "yesterday" | "older";
-
-export interface FileItem {
-    id: string;
-    name: string;
-    type: FileType;
-    viewedDate: ViewedDate;
-    createdDate: Date;
-    desc: string;
-    sharedBy?: string;
+export interface DocFile {
+  id: string;
+  title: string;
+  desc?: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
+  workspaceId: string;
 }
-
-export interface FileTypeMeta {
-    icon: JSX.Element;
-    bg: string;
-}
-const allFiles: FileItem[] = [
-    {
-        id: "1",
-        name: "Notes Draft",
-        type: "document",
-        viewedDate: "yesterday",
-        createdDate: new Date(2023, 3, 14),
-        desc: "A design for the new project",
-        sharedBy: "Tanveer Singh",
-    },
-    {
-        id: "2",
-        name: "Testing",
-        type: "document",
-        viewedDate: "yesterday",
-        createdDate: new Date(2023, 1, 14),
-        desc: "A design for the new project",
-        sharedBy: "Tanveer Singh",
-    },
-    {
-        id: "3",
-        name: "CIE File",
-        type: "document",
-        viewedDate: "yesterday",
-        createdDate: new Date(2023, 2, 14),
-        desc: "A design for the new project",
-        sharedBy: "Unknown",
-    },
-    {
-        id: "4",
-        name: "DSA Notes",
-        type: "document",
-        viewedDate: "yesterday",
-        createdDate: new Date(2023, 2, 15),
-        desc: "A design for the new project",
-        sharedBy: "Tanveer Singh",
-    },
-];
-
-
 
 interface AllDocsProps {
-    onFileClick: (id: string, workspaceId: number) => void;
+  onFileClick: (id: string, workspaceId: number) => void;
 }
 
 const AllDocs = ({ onFileClick }: AllDocsProps) => {
-    const [isSearchOpen, setSearchOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [isCreate, setIsCreate] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isSearchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [files, setFiles] = useState<DocFile[]>([]);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newDocName, setNewDocName] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const { getDocsList, loading } = useGetFileList();
+  const { loading: isCreating, createDocs } = useCreateFile();
+  const workspaceId = selectedWorkspaceId();
 
-    const filterFiles = () => {
-        const filtered = allFiles.filter((file) =>
-            file.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        return filtered;
+  useEffect(() => {
+    if (workspaceId.value) {
+      getDocsList(workspaceId.value).then((data) => {
+        if (Array.isArray(data)) setFiles(data);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaceId.value]);
+
+  const filterFiles = () => {
+    return files.filter((file) =>
+      file.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
+
+  const Files = filterFiles();
+
+  // Fetch docs
+  const fetchDocs = () => {
+    if (workspaceId.value) {
+      getDocsList(workspaceId.value).then((data) => {
+        if (Array.isArray(data)) setFiles(data);
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchDocs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workspaceId.value]);
+
+const handleCreateDoc = async () => {
+  if (!newDocName.trim() || !workspaceId.value) return;
+  await createDocs(workspaceId.value, newDocName.trim());
+  fetchDocs();
+  setShowCreateModal(false);
+  setNewDocName("");
+};
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setSearchOpen(false);
+      }
     };
 
-    const Files = filterFiles();
+    if (isSearchOpen || showCreateModal) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isSearchOpen, showCreateModal]);
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(event.target as Node)
-            ) {
-                setSearchOpen(false);
-                setIsCreate(false);
-            }
-        };
+  return (
+    <>
+      <div className="p-6 md:p-8 lg:p-10 relative lg:px-28 h-full">
+        <div className="w-full flex items-center justify-between mb-6 relative">
+          <h2 className="text-xl font-semibold text-gray-800">All Documents</h2>
+          <div
+            ref={dropdownRef}
+            onClick={() => setShowCreateModal(true)}
+            className={`create flex items-center justify-center gap-1 bg-[#007A5A] px-3 py-1 rounded-md transition-colors text-[#ffffff] hover:bg-[#007A5A]/80 cursor-pointer ${isCreating ? "opacity-60 pointer-events-none" : ""}`}
+          >
+            <Plus className="w-4 h-4" />
+            <h2 className="text-md">New</h2>
+          </div>
+        </div>
 
-        if (isSearchOpen) {
-            document.addEventListener("mousedown", handleClickOutside);
-        }
-        if (isCreate) {
-            document.addEventListener("mousedown", handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [isSearchOpen, isCreate]);
+        {/* Search Bar */}
+        <div
+          onClick={() => setSearchOpen(true)}
+          className="rounded-lg mb-6 bg-white border border-gray-300 px-4 py-1.5 flex items-center justify-between cursor-text hover:shadow-md transition-shadow"
+        >
+          <input
+            type="text"
+            className="w-full outline-none text-base bg-transparent placeholder:text-gray-400"
+            placeholder="Search files..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <Search className="w-5 h-5 text-gray-500" />
+        </div>
 
-    return (
-        <>
-            <div className="p-6 md:p-8 lg:p-10 relative lg:px-28 h-full">
-                <div className="w-full flex items-center justify-between mb-6 relative">
-                    <h2 className="text-xl font-semibold text-gray-800">All Canvases</h2>
-                    <div
-                        ref={dropdownRef}
-                        onClick={() => {
-                            setIsCreate(!isCreate);
-                        }}
-                        className="create flex items-center justify-center gap-1 bg-[#007A5A] px-3 py-1 rounded-md transition-colors text-[#ffffff] hover:bg-[#007A5A]/80 cursor-pointer"
-                    >
-                        <Plus className="w-4 h-4" />
-                        <h2 className="text-md">New</h2>
-                    </div>
-
-                    {isCreate && (
-                        <div className="absolute right-0 top-[80%] py-2 bg-[#F8F8F8] rounded-lg flex flex-col items-start justify-start w-56 border border-[#d2d1d1] shadow-lg z-10 text-[#1f1f1fe8]">
-                            <div className="px-5 hover:bg-[#837b73] w-full">
-                                <h4>New Canvas</h4>
-                            </div>
-                            <div className="px-5 hover:bg-[#837b73] w-full">
-                                <h4>Start From a Template</h4>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* Search Bar */}
-                <div
-                    onClick={() => setSearchOpen(true)}
-                    className="rounded-lg mb-6 bg-white border border-gray-300 px-4 py-1.5 flex items-center justify-between cursor-text hover:shadow-md transition-shadow"
-                >
-                    <input
-                        type="text"
-                        className="w-full outline-none text-base bg-transparent placeholder:text-gray-400"
-                        placeholder="Search files..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    <Search className="w-5 h-5 text-gray-500" />
-                </div>
-
-                {/* file */}
-                <div className="mt-4 flex flex-col gap-5">
-                    {Object.entries(Files).length > 0 ? (
-                        <div className="mb-6">
-                            <div className="rounded-lg bg-white border border-gray-200 flex flex-col shadow-sm overflow-hidden">
-                                {Files.map((file) => (
-                                    <div
-                                        onClick={() => onFileClick(file.id, 1)}
-                                        key={file.id}
-                                        className="px-4 py-3 flex items-center gap-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
-                                    >
-                                        <div
-                                            className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 ${
-                                                fileTypeData[file.type].bg
-                                            } shadow-sm`}
-                                        >
-                                            <div className="scale-125">
-                                                {fileTypeData[file.type].icon}
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col gap-1 flex-grow">
-                      <span className="truncate text-base font-medium text-gray-800">
-                        {file.name}
-                      </span>
-                                            <span className="truncate text-xs text-gray-500">
-                        {file.sharedBy && `Shared by ${file.sharedBy}`} ·{" "}
-                                                {file.createdDate.toLocaleDateString()}
-                      </span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-gray-200 shadow-sm">
-                            <Search className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                            <p className="text-lg">No files match your search criteria</p>
-                            <p className="text-sm mt-2">
-                                Try adjusting your filters or search term
-                            </p>
-                        </div>
-                    )}
-                </div>
+        {/* file */}
+        <div className="mt-4 flex flex-col gap-5">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center h-32">
+              <RingLoader color="#007A5A" size={40} />
+              <p className="text-gray-500 mt-2">Loading all documents...</p>
             </div>
-        </>
-    );
+          ) : Files.length > 0 ? (
+            <div className="mb-6">
+              <div className="rounded-lg bg-white border border-gray-200 flex flex-col shadow-sm overflow-hidden">
+                {Files.map((file) => (
+                  <div
+                    key={file.id}
+                    onClick={() =>
+                      onFileClick(file.id, Number(file.workspaceId))
+                    }
+                    className="px-4 py-3 flex items-center gap-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
+                  >
+                    <div
+                      className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 bg-[#E19B06] shadow-sm`}
+                    >
+                      <div className="scale-125">
+                        <FileText className="w-4 h-4 text-white" />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1 flex-grow">
+                      <span className="truncate text-base font-medium text-gray-800">
+                        {file.title}
+                      </span>
+                      <span className="truncate text-xs text-gray-400">
+                        {new Date(file.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-gray-200 shadow-sm">
+              <Search className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-lg">No files match your search criteria</p>
+              <p className="text-sm mt-2">
+                Try adjusting your filters or search term
+              </p>
+            </div>
+          )}
+        </div>
+
+        {showCreateModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-sm flex flex-col items-center relative">
+              <button
+                className="absolute top-3 right-3 text-gray-400 hover:text-gray-700"
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setNewDocName("");
+                }}
+                disabled={isCreating}
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <h2 className="text-xl font-semibold mb-4">Create New Document</h2>
+              <input
+                type="text"
+                className="border border-gray-300 rounded px-3 py-2 w-full mb-4"
+                placeholder="Enter document name"
+                value={newDocName}
+                onChange={(e) => setNewDocName(e.target.value)}
+                disabled={isCreating}
+                autoFocus
+              />
+              <button
+                className={`bg-[#007A5A] text-white px-4 py-2 rounded w-full font-medium transition-colors ${isCreating ? "opacity-60 cursor-not-allowed" : "hover:bg-[#00664a]"}`}
+                onClick={handleCreateDoc}
+                disabled={isCreating || !newDocName.trim()}
+              >
+                {isCreating ? "Creating..." : "Create"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
 };
+
 export default AllDocs;

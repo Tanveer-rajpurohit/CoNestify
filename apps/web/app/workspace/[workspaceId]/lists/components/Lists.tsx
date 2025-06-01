@@ -1,13 +1,25 @@
 import { selectedListType } from "@context/ListContext";
 import AllList from "./AllList";
-import YourList from "./YourList";
+import { selectedWorkspaceId } from "@context/workspaceContext";
+import { useEffect } from "react";
 
 const Lists = () => {
   const { value: fileType } = selectedListType();
   const onFileClick = (fileId: string, workspaceId: number) => {
-    
     window.location.href = `/workspace/${workspaceId}/lists/${fileId}`;
   };
+
+  const workspaceId = selectedWorkspaceId();
+
+  useEffect(() => {
+    if (!workspaceId.value) {
+      const pathParts = window.location.pathname.split("/");
+      const id = pathParts[2] ?? null;
+      workspaceId.set(id as string);
+      console.log("Workspace ID:", id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -16,7 +28,6 @@ const Lists = () => {
 
         <div className="relative z-10 h-full">
           {fileType === "All List" && <AllList onFileClick={onFileClick} />}
-          {fileType === "Created by you" && <YourList onFileClick={onFileClick} />}
         </div>
       </div>
     </>

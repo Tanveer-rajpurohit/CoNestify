@@ -1,12 +1,25 @@
 import { selectedDocsType } from "@context/DocsContext";
 import AllDocs from "./AllDocs";
-import YourDocs from "./YourDocs";
+import { selectedWorkspaceId } from "@context/workspaceContext";
+import { useEffect } from "react";
 
 const Docs = () => {
   const { value: fileType } = selectedDocsType();
   const onFileClick = (fileId: string, workspaceId: number) => {
     window.location.href = `/workspace/${workspaceId}/docs/${fileId}`;
   };
+
+  const workspaceId = selectedWorkspaceId();
+  
+    useEffect(() => {
+        if (!workspaceId.value) {
+          const pathParts = window.location.pathname.split("/");
+          const id = pathParts[2] ?? null;
+          workspaceId.set(id as string);
+          console.log("Workspace ID:", id);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
   return (
     <>
       <div className="w-full min-h-screen relative">
@@ -14,9 +27,6 @@ const Docs = () => {
 
         <div className="relative z-10 h-full">
           {fileType === "All Docs" && <AllDocs onFileClick={onFileClick} />}
-          {fileType === "Created by you" && (
-            <YourDocs onFileClick={onFileClick} />
-          )}
         </div>
       </div>
     </>

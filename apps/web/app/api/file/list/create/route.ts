@@ -13,6 +13,17 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
         return NextResponse.json({ error: "workspaceId and name is required" }, { status: 400 });
     }
 
+       const existinglist = await prisma.list.findFirst({
+        where: {
+            workspaceId: workspaceId,
+            title: name,
+            userId: userId
+        }
+    });
+    if (existinglist) {
+        return NextResponse.json({ error: "List with that name already exists in this workspace" }, { status: 400 });
+    }
+
     try{
 
         const list = await prisma.list.create({
