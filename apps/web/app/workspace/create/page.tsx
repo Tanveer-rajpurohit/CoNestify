@@ -45,7 +45,6 @@ const Page = () => {
         invitations: emails,
       });
 
-      console.log("Workspace created!", result);
       if (result) {
         navigate.push("/workspace");
       }

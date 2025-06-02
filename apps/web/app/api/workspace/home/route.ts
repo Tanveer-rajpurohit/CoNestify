@@ -53,6 +53,16 @@ export const GET = async (req: NextRequest): Promise<NextResponse> => {
       },
     });
 
+     // Check if user is a member
+    const isMember = workspace[0]?.members.some(
+      (member: any) => member.user.id === userId
+    );
+
+    if (!isMember) {
+      // Redirect to /workspace if not a member
+      return NextResponse.redirect(new URL("/workspace", req.url));
+    }
+
     return NextResponse.json({
       workspace: workspace,
       currentUserId: userId,

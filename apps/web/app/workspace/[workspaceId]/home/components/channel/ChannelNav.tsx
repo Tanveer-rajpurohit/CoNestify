@@ -4,7 +4,7 @@ import React from "react";
 import { ChevronDown, User2, EllipsisVertical } from "lucide-react";
 import { PiHeadphonesLight } from "react-icons/pi";
 import SelecteFileTab from "../SelecteFileTab";
-import { selectedCommunication } from "@context/workspaceContext";
+import { selectedCommunication, workspaceContext } from "@context/workspaceContext";
 
 interface WorkspaceChannel {
   id: string;
@@ -19,6 +19,9 @@ const ChannelNav = () => {
 const selected = selectedCommunication((state) => state.data) as {
   value?: WorkspaceChannel;
 };
+
+const workspace = workspaceContext((state) => state.data);
+
   return (
     <div className="w-full border-b border-[#EBEEF0]">
       {/* Top nav */}
@@ -37,7 +40,7 @@ const selected = selectedCommunication((state) => state.data) as {
             <div className="w-5 h-5 rounded-sm bg-[#44BEDF] flex items-center justify-center text-white">
               <User2 className="w-4 h-4 " />
             </div>
-            <h4 className="text-sm font-mono px-1">2</h4>
+            <h4 className="text-sm font-mono px-1">{workspace.members.length}</h4>
           </div>
 
           <div className="meet  flex items-center justify-between rounded-md border border-[#E6E6E6] text-[#4A5565] ">

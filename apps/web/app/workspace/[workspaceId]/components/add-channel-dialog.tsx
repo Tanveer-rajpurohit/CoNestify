@@ -59,8 +59,6 @@ export function AddChannelDialog({
   }, [open, onOpenChange]);
 
   const handleSubmit = () => {
-    // Handle channel creation logic here
-    console.log("Creating channel:", { channelName, description });
     onOpenChange(false);
 
     createChannel(workspaceId,channelName, description).then(()=>{

@@ -21,31 +21,34 @@ function formatDate(dateString: string) {
 }
 
 
-const MessageUI = () => {
+const DMMessageUI = () => {
   const workspaceId = selectedWorkspaceId((state) => state.value);
   const selected = selectedCommunication((state) => state.data) as {
-    value?: { id: string };
+    value?: { user: {
+      id: string
+    }};
   };
 
   const Messages = allMessages((state) => state.data) as MessageTypes[];
   const SetMessages = allMessages((state) => state.set);
   const userId = currentUserId((state) => state.value);
 
-  const { channelMessage, loading } = useGetMessage();
+  const { DMMessage, loading } = useGetMessage();
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-   const scrollRef = useRef<HTMLDivElement>(null);
-
-    const isUserAtBottom = () => {
+  const isUserAtBottom = () => {
     const el = scrollRef.current;
     if (!el) return true;
     return el.scrollHeight - el.scrollTop - el.clientHeight < 50; // 50px threshold
   };
 
-   const scrollToBottom = () => {
+  // Scroll to bottom
+  const scrollToBottom = () => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   };
 
+  // On new messages, scroll if user is at bottom
   useEffect(() => {
     if (isUserAtBottom()) {
       scrollToBottom();
@@ -53,10 +56,12 @@ const MessageUI = () => {
   }, [Messages.length]);
 
 
+
   // Group messages by formatted date
   const groupMessagesByDate = (messages: MessageTypes[]) => {
     const groups: { [key: string]: MessageTypes[] } = {};
-    messages.forEach((message) => {
+    if(messages.length === 0) return groups
+    messages?.forEach((message) => {
       const groupDate = formatDate(message.createdAt);
       if (!groups[groupDate]) {
         groups[groupDate] = [];
@@ -69,13 +74,13 @@ const MessageUI = () => {
   const messageGroups = groupMessagesByDate(Messages);
 
   useEffect(() => {
-    if (workspaceId && selected.value?.id) {
-      channelMessage(workspaceId, selected.value.id).then((data) => {
+    if (workspaceId && selected.value?.user.id) {
+      DMMessage(workspaceId, selected.value.user.id).then((data) => {
         SetMessages(data);
       });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspaceId, selected.value?.id]);
+  }, [workspaceId, selected.value?.user.id]);
 
   // File click handler
   const onFileClick = (
@@ -263,4 +268,4 @@ const MessageUI = () => {
   );
 };
 
-export default MessageUI;
+export default DMMessageUI;

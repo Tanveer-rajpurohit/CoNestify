@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Permanent_Marker, Nothing_You_Could_Do,Balthazar,Poppins } from "next/font/google"; // Import Google Font
+import {
+  Permanent_Marker,
+  Nothing_You_Could_Do,
+  Balthazar,
+  Poppins,
+} from "next/font/google";
 import "./globals.css";
+import SocketInitializer from "./util/SocketInitializer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -12,31 +18,29 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
 });
 
-// Add Permanent Marker font
 const permanentMarker = Permanent_Marker({
-  weight: "400", // Specify the weight if needed
-  subsets: ["latin"], // Specify the subset
-  variable: "--font-permanent-marker", // Add a CSS variable for the font
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-permanent-marker",
 });
 
 const NothingYouCouldDo = Nothing_You_Could_Do({
-  weight: "400", 
-  subsets: ["latin"], 
+  weight: "400",
+  subsets: ["latin"],
   variable: "--font-nothing-you-could-do",
 });
 
 const balthazarFont = Balthazar({
-  weight: "400", 
-  subsets: ["latin"], 
-  variable: "--font-balthazar", 
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-balthazar",
 });
 
 const poppinsFont = Poppins({
-  weight: "400", 
-  subsets: ["latin"], 
-  variable: "--font-poppins", 
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-poppins",
 });
-
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -48,13 +52,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Remove useSocketStore and useEffect from here if not using "use client"
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${permanentMarker.variable} ${NothingYouCouldDo.variable}  ${balthazarFont.variable} ${poppinsFont.variable} `}
       >
-     
-          {children}
+
+        <SocketInitializer />
+        {children}
       </body>
     </html>
   );

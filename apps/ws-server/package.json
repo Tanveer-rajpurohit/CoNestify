@@ -4,23 +4,26 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node src/index.ts",
-    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "build": "esbuild src/index.ts --platform=node --bundle --outdir=dist",
     "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "devDependencies": {
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/node": "^22.15.29",
     "@types/socket.io": "^3.0.1",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@repo/db": "*",
+    "esbuild": "^0.25.5",
     "express": "^5.1.0",
     "socket.io": "^4.8.1"
   }

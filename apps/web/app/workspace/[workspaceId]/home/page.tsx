@@ -12,11 +12,9 @@ const WorkspacePage = () => {
     const pathParts = window.location.pathname.split('/');
     const id = pathParts[2] ?? null;
     workspaceId.set(id as string);
-    console.log("Workspace ID:", id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log("Workspace ID from context:", workspaceId.value);
 
   return (
     <WorkspaceLayout>

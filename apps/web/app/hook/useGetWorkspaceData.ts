@@ -15,6 +15,11 @@ export const useGetWorkspaceData = () => {
                 },
             });
 
+              if (res.redirected) {
+                window.location.href = res.url;
+                return;
+            }
+
             const data = await res.json();
 
             if (!res.ok) {
@@ -27,6 +32,8 @@ export const useGetWorkspaceData = () => {
                 const err = await res.json();
                 throw new Error(err.error || "Something went wrong");
             }
+
+
 
             return data;
         } catch (err: unknown) {

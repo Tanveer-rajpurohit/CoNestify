@@ -44,7 +44,6 @@ const People = () => {
       const pathParts = window.location.pathname.split("/");
       const id = pathParts[2] ?? null;
       workspaceId.set(id as string);
-      console.log("Workspace ID:", id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -53,7 +52,6 @@ const People = () => {
     if (workspaceId.value) {
       (async () => {
         const data = await WorkspacePeopleList(workspaceId.value!);
-        console.log("Fetched members:", data.members);
         setMembers(data.members);
       })();
     }

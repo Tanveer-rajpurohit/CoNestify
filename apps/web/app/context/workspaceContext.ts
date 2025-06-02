@@ -26,6 +26,7 @@ interface WorkspaceUser {
     id: string;
     name?: string | null;
     email: string;
+    image: string;
 }
 interface WorkspaceMember {
     id: string;
@@ -87,4 +88,33 @@ export const selectedCommunication = create<SelectedCommunicationStore>((set) =>
     type: "channel",
   },
   set: (data) => set({ data }),
+}));
+
+export interface MessageTypes {
+    id: string;
+    content: string;
+    createdAt: string;
+    type: string;
+    senderId: string;
+    sender: WorkspaceUser;
+    channelId: string | null;
+    workspaceId: string;
+    receiverId: string | null;
+    canvas: { id: string; title: string } | null;
+    canvasId: string | null;
+    doc: { id: string; title: string } | null;
+    docId: string | null;
+    fileId: string | null;
+    list: { id: string; title: string } | null;
+    listId: string | null;
+}
+
+interface AllMessagesStore {
+    data: MessageTypes[];
+    set: (data: MessageTypes[]) => void;
+}
+
+export const allMessages = create<AllMessagesStore>((set) => ({
+    data: [],
+    set: (data: MessageTypes[]) => set({ data }),
 }));

@@ -19,7 +19,6 @@ const Canvas = () => {
         const pathParts = window.location.pathname.split("/");
         const id = pathParts[2] ?? null;
         workspaceId.set(id as string);
-        console.log("Workspace ID:", id);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

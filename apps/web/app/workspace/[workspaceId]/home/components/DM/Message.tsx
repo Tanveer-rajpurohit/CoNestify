@@ -1,167 +1,210 @@
 "use client";
+import React, { useEffect, useRef, useState } from "react";
+import { Picker } from "emoji-mart";
+import "emoji-mart/css/emoji-mart.css";
+import { Send } from "lucide-react";
+import { useGetFileList } from "app/hook/useGetFileList";
+import { FilePickerModal } from "../FilePickerModel";
 
-import  React from "react";
-import { useState } from "react";
-import MessageUI from "../MessageUI";
-import UserInfo from "./UserInfo";
+import {
+  allMessages,
+  currentUserId,
+  selectedCommunication,
+  selectedWorkspaceId,
+} from "@context/workspaceContext";
+import { useSocketStore } from "@context/SocketContext";
+import DMMessageUI from "./DMMessageUI";
+
+interface WorkspaceUser {
+    id: string;
+    name?: string | null;
+    email: string;
+    image: string;
+}
+interface WorkspaceMember {
+    id: string;
+    user: WorkspaceUser;
+    role: string;
+    joinedAt: string;
+}
+
+interface RecentFile {
+  id: string;
+  name: string;
+  type: "canvas" | "doc" | "list";
+  updatedAt: string;
+  createdAt: string;
+  desc?: string;
+  workspaceId: string;
+  sharedBy?: string;
+}
 
 export default function MessageDM() {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const workspaceId = selectedWorkspaceId((state) => state.value);
+  const selected = selectedCommunication((state) => state.data) as {
+    value?: WorkspaceMember;
+  };
+
+  const userId = currentUserId((state) => state.value);
+  const socket = useSocketStore((state) => state.socket);
+  const messages = allMessages((state) => state.data);
+  const setMessages = allMessages((state) => state.set);
+
+  const [showFilePicker, setShowFilePicker] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<RecentFile | null>(null);
+
+  const { getAllFileList } = useGetFileList();
+  const [allFiles, setAllFiles] = useState<RecentFile[]>([]);
+
+  useEffect(() => {
+    if (!socket || !selected.value?.id) return;
+
+    socket.emit("join-dm", { userId: userId, receiverId: selected.value?.user.id });
+
+    // Listen for new messages
+    const handleNewMessage = (msg: any) => {
+        setMessages([...messages, msg]);
+     
+
+    };
+
+    socket.on("DM-newMessage", handleNewMessage);
+
+    // Cleanup
+    return () => {
+      socket.off("DM-newMessage", handleNewMessage);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket,messages, setMessages]);
+
+  const handleSend = () => {
+    if (!socket) return;
+
+    // If sending a file
+    if (selectedFile) {
+      socket.emit("DM-sendMessage", {
+        message, // or a caption if you want
+        workspaceId,
+        receiverId: selected.value?.user.id,
+        userId,
+
+        type: selectedFile.type, // "canvas" | "doc" | "list"
+        // Send the correct ID based on type
+        canvasId: selectedFile.type == "canvas" ? selectedFile.id : null,
+        docId: selectedFile.type == "doc" ? selectedFile.id : null,
+        listId: selectedFile.type == "list" ? selectedFile.id : null,
+      });
+      setSelectedFile(null);
+      setMessage("");
+      return;
+    }
+
+    // If sending a text message
+    if (message.trim()) {
+      socket.emit("DM-sendMessage", {
+        message,
+        workspaceId,
+        receiverId: selected.value?.user.id,
+        userId,
+        type: "text",
+      });
+      setMessage("");
+    }
+  };
+
+  const handleFileAttach = async () => {
+    if (workspaceId) {
+      const data = await getAllFileList(workspaceId);
+      if (Array.isArray(data)) setAllFiles(data);
+    }
+    setShowFilePicker(true);
+  };
+
+  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
   };
 
   const toggleEmojiPicker = () => {
-    setShowEmojiPicker(!showEmojiPicker);
+    setShowEmojiPicker((prev) => !prev);
+  };
+
+  // Handle file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Implement your file upload logic here
+      alert(`Selected file: ${file.name}`);
+    }
+  };
+
+  // Add emoji to message
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleEmojiSelect = (emoji: any) => {
+    setMessage((prev) => prev + emoji.native);
+    setShowEmojiPicker(false);
   };
 
   return (
     <div className="flex flex-col h-full ">
-
-      <div className="flex-1 overflow-y-auto ">
-        <UserInfo />
-
-        <MessageUI />
+      <div className="flex-1 overflow-y-auto">
+        <DMMessageUI />
       </div>
 
-     {/*input */}
-      <div className="border-t border-gray-300  sticky bottom-0 bg-white py-1 px-3">
-        <div className="border rounded-lg overflow-hidden">
-          <div className="flex items-center  px-3 py-1 bg-[#efededbc]">
-            <button className="p-1 rounded hover:bg-gray-100">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 15l7-7 7 7"
-                />
-              </svg>
-            </button>
-            <button className="p-1 rounded hover:bg-gray-100 ml-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h7"
-                />
-              </svg>
-            </button>
-            <button className="p-1 rounded hover:bg-gray-100 ml-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </button>
-            <button className="p-1 rounded hover:bg-gray-100 ml-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                />
-              </svg>
-            </button>
-            <button className="p-1 rounded hover:bg-gray-100 ml-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </button>
-            <button className="p-1 rounded hover:bg-gray-100 ml-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                />
-              </svg>
-            </button>
-          </div>
-          <div className="p-1">
+      <div className="border-t border-gray-200 bg-white py-2 px-4 sticky bottom-0 z-10">
+        <div className="flex items-center gap-2 bg-[#f7f7f9] rounded-full px-3 py-2 shadow-sm border border-gray-200">
+          <button
+            className="p-2 rounded-full hover:bg-gray-100 transition"
+            onClick={handleFileAttach}
+            type="button"
+            aria-label="Attach file"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-gray-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l7.07-7.07a4 4 0 10-5.657-5.657l-7.071 7.07a6 6 0 108.485 8.486l7.071-7.072"
+              />
+            </svg>
             <input
-              type="text"
-              value={message}
-              onChange={handleMessageChange}
-              placeholder="Message #all-testing"
-              className="w-full px-2 py-1 outline-none"
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleFileChange}
             />
-          </div>
-          <div className="flex items-center px-3 py-1 ">
-            <button className="p-1 rounded hover:bg-gray-100">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+          </button>
+
+          {/* Show selected file as a chip */}
+          {selectedFile && (
+            <div className="bg-gray-200 rounded px-2 py-1 text-sm flex items-center gap-2 ml-2">
+              <span>{selectedFile.name}</span>
+              <button
+                className="text-gray-500 hover:text-gray-700"
+                onClick={() => setSelectedFile(null)}
+                type="button"
+                aria-label="Remove file"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                />
-              </svg>
-            </button>
+                ×
+              </button>
+            </div>
+          )}
+          {/* Emoji Picker */}
+          <div className="relative">
             <button
-              className="p-1 rounded hover:bg-gray-100 ml-1"
+              className="p-2 rounded-full hover:bg-gray-100 transition"
               onClick={toggleEmojiPicker}
+              type="button"
+              aria-label="Emoji"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -178,89 +221,50 @@ export default function MessageDM() {
                 />
               </svg>
             </button>
-            <button className="p-1 rounded hover:bg-gray-100 ml-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
-                />
-              </svg>
-            </button>
-            <button className="p-1 rounded hover:bg-gray-100 ml-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-            </button>
-            <button className="p-1 rounded hover:bg-gray-100 ml-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-                />
-              </svg>
-            </button>
-            <button className="p-1 rounded hover:bg-gray-100 ml-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-                />
-              </svg>
-            </button>
-            <button className="ml-auto p-1 rounded-md bg-gray-100 hover:bg-gray-200">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
+            {showEmojiPicker && (
+              <div className="absolute bottom-12 left-0 z-50">
+                <Picker onSelect={handleEmojiSelect} theme="light" />
+              </div>
+            )}
           </div>
+
+          {/* Message Input */}
+          <textarea
+            value={message}
+            onChange={handleMessageChange}
+            placeholder="Message #all-testing"
+            className="flex-1 bg-transparent outline-none resize-none px-2 py-1 rounded-full min-h-[36px] max-h-32 text-sm"
+            rows={1}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            style={{ lineHeight: "1.5", marginTop: 0, marginBottom: 0 }}
+          />
+
+          {/* Send Button */}
+          <button
+            className={`ml-2 flex items-center gap-1 px-4 py-2 rounded-full font-semibold transition text-white bg-gradient-to-r from-[#00b289] to-[#007A5A] shadow-md hover:from-[#00c99a] hover:to-[#32947A] disabled:opacity-60 disabled:cursor-not-allowed`}
+            onClick={handleSend}
+            type="button"
+            aria-label="Send"
+            disabled={!message.trim()}
+          >
+            <Send className="w-4 h-4" />
+            <span className="hidden sm:inline">Send</span>
+          </button>
         </div>
       </div>
+
+      {showFilePicker && (
+        <FilePickerModal
+          files={allFiles}
+          onSelect={setSelectedFile}
+          onClose={() => setShowFilePicker(false)}
+        />
+      )}
     </div>
   );
 }
