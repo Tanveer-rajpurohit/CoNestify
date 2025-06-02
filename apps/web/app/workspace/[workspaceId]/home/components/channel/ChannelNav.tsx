@@ -1,33 +1,34 @@
 "use client";
 
 import React from "react";
-import {
-  ChevronDown,
-  User2,
-  EllipsisVertical,
-} from "lucide-react";
+import { ChevronDown, User2, EllipsisVertical } from "lucide-react";
 import { PiHeadphonesLight } from "react-icons/pi";
-import { useSidebarSelectionCommunication } from "@context/SidebarSeletion";
 import SelecteFileTab from "../SelecteFileTab";
+import { selectedCommunication } from "@context/workspaceContext";
 
+interface WorkspaceChannel {
+  id: string;
+  name: string;
+  description?: string | null;
+  isPrivate: boolean;
+}
 
 
 const ChannelNav = () => {
-  const selectedCommunication = useSidebarSelectionCommunication(
-    (state) => state.data
-  );
-
-
+ 
+const selected = selectedCommunication((state) => state.data) as {
+  value?: WorkspaceChannel;
+};
   return (
     <div className="w-full border-b border-[#EBEEF0]">
       {/* Top nav */}
       <div className="nav py-2 flex items-center justify-between px-4 ">
         <div className="name flex items-baseline justify-center gap-3">
           <h2 className="text-2xl font-medium">
-            # {selectedCommunication.value}
+            # {selected.value?.name}
           </h2>
           <p className="text-xs text-[#1d1c1dc3]">
-            Your go-to channel for organizational resources
+            {selected.value?.description}
           </p>
         </div>
 
@@ -58,7 +59,7 @@ const ChannelNav = () => {
       </div>
 
       {/* Tab Section */}
-      <SelecteFileTab/>
+      <SelecteFileTab />
     </div>
   );
 };

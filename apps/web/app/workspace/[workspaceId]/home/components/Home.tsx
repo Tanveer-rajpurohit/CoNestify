@@ -1,12 +1,12 @@
 "use client";
 
 import React from 'react';
-import { useSidebarSelectionCommunication } from "../../../../context/SidebarSeletion"
 import Channel from './channel/Channel';
 import DM from './DM/DM';
+import { selectedCommunication } from '@context/workspaceContext';
 
 const Home = () => {
-  const selctedCommunication = useSidebarSelectionCommunication((state)=>state.data);
+  const selctedCommunication = selectedCommunication((state)=>state.data);
 
   
   return (

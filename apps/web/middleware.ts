@@ -1,4 +1,3 @@
-
 // middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -31,7 +30,6 @@ export async function middleware(req: NextRequest) {
       );
     }
 
-
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set("x-user-id", id);
     requestHeaders.set("x-user-email", email);
@@ -51,6 +49,11 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/workspace/:path*", "/api/user/:path*","/api/message","/api/file/:path*"], 
-
+  matcher: [
+    "/api/workspace/:path*",
+    "/api/user/:path*",
+    "/api/message",
+    "/api/file/:path*",
+    "/api/channel/:path*",
+  ],
 };

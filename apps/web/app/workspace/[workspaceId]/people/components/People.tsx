@@ -3,9 +3,6 @@ import {
   User2Icon,
   X,
   Dot,
-  Clock,
-  MessageCircle,
-  EllipsisVertical,
   Mail,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -55,11 +52,12 @@ const People = () => {
   useEffect(() => {
     if (workspaceId.value) {
       (async () => {
-        const data = await WorkspacePeopleList(workspaceId.value);
+        const data = await WorkspacePeopleList(workspaceId.value!);
         console.log("Fetched members:", data.members);
         setMembers(data.members);
       })();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceId.value]);
 
   const filterFiles = () => {

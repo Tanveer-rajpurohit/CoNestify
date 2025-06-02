@@ -5,12 +5,25 @@ import {
   User2,
   EllipsisVertical,
 } from "lucide-react"
-import { useSidebarSelectionCommunication } from "@context/SidebarSeletion";
 import SelecteFileTab from "../SelecteFileTab";
 
+interface WorkspaceUser {
+    id: string;
+    name?: string | null;
+    email: string;
+}
+interface WorkspaceMember {
+    id: string;
+    user: WorkspaceUser;
+    role: string;
+    joinedAt: string;
+}
 
-const DMNav = () => {
-  const selectedCommunication = useSidebarSelectionCommunication((state) => state.data)
+interface DMNavProps {
+  selected: WorkspaceMember;
+}
+
+const DMNav = ({ selected }: DMNavProps) => {
 
   return (
     <div className="w-full border-b border-[#EBEEF0]">
@@ -21,9 +34,12 @@ const DMNav = () => {
                     <User2 className="w-5 h-5 text-white "/>
                 </div>
               <h2 className="text-2xl font-medium">
-                {selectedCommunication.value}
+                {selected.user.name}
               </h2>
-             
+
+              <p className="text-xs text-[#1d1c1dc3]">
+            {selected?.role}
+          </p>
             </div>
 
             <div className="">

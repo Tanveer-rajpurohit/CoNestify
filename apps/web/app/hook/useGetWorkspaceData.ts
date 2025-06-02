@@ -7,13 +7,12 @@ export const useGetWorkspaceData = () => {
         setLoading(true);
 
         try {
-            const res = await fetch(`/api/workspace/home`, {
+            const res = await fetch(`/api/workspace/home?workspaceId=${encodeURIComponent(workspaceId)}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("authToken")}`,
                 },
-                body: JSON.stringify({ workspaceId }),
             });
 
             const data = await res.json();

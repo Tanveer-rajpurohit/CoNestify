@@ -377,7 +377,6 @@ const AllFilesList = ({ onFileClick }: AllFilesListProps) => {
                             {file.name}
                           </span>
                           <span className="truncate text-xs text-gray-500">
-                            {file.sharedBy && `Shared by ${file.sharedBy}`}{" "}
                             {new Date(file.createdAt).toLocaleDateString()}
                           </span>
                         </div>
