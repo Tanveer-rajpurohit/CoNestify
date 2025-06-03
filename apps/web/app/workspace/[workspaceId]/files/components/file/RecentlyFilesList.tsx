@@ -2,6 +2,7 @@
 import { selectedWorkspaceId } from "@context/workspaceContext";
 import { useGetFileList } from "app/hook/useGetFileList";
 import { Search, Brush, ListTodo, FileText } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { RingLoader } from "react-spinners";
 
@@ -14,12 +15,18 @@ interface RecentFile {
   desc?: string;
   workspaceId: string;
   sharedBy?: string;
+  createdBy: {
+    id: string;
+    name: string;
+    email: string;
+    image: string;
+  };
 }
 
 interface RecentlyFilesListProps {
   onFileClick: (
     fileId: string,
-    workspaceId: number,
+    workspaceId: string,
     fileType: RecentFile["type"]
   ) => void;
 }
@@ -160,7 +167,7 @@ const RecentlyFilesList = ({ onFileClick }: RecentlyFilesListProps) => {
                       onClick={() =>
                         onFileClick(
                           file.id,
-                          Number(file.workspaceId),
+                          file.workspaceId,
                           file.type
                         )
                       }
@@ -186,6 +193,25 @@ const RecentlyFilesList = ({ onFileClick }: RecentlyFilesListProps) => {
                           {new Date(file.updatedAt).toLocaleDateString()}
                         </span>
                       </div>
+                       <div className="flex items-center">
+                      <div className="w-8 h-8 rounded-full overflow-hidden">
+                        <Image
+                          className="w-full h-full object-cover"
+                          width={40}
+                          height={40}
+                          src={file.createdBy.image}
+                          alt={file.createdBy.name}
+                        />
+                      </div>
+                      <div className="ml-2">
+                        <p className="text-sm font-medium">
+                          {file.createdBy.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {file.createdBy.email}
+                        </p>
+                      </div>
+                    </div>
                     </div>
                   );
                 })}

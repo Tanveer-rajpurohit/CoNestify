@@ -9,6 +9,7 @@ import FileTypeFilterDropdown from "./file-type-filter-dropdown";
 import { selectedWorkspaceId } from "@context/workspaceContext";
 import { useGetFileList } from "app/hook/useGetFileList";
 import { RingLoader } from "react-spinners";
+import Image from "next/image";
 
 export type FileType = "canvas" | "document" | "list" | "doc";
 export type ViewedDate = "today" | "yesterday" | "older";
@@ -35,6 +36,12 @@ export interface FileItem {
   updatedAt: string;
   createdAt: string;
   workspaceId: string;
+  createdBy: {
+    id: true;
+    name: true;
+    email: true;
+    image: true;
+  };
 }
 
 export interface FileTypeMeta {
@@ -77,7 +84,11 @@ function getViewedDate(updatedAt: string) {
 }
 
 interface AllFilesListProps {
-  onFileClick: (fileId: string, workspaceId: number, fileType: FileType) => void;
+  onFileClick: (
+    fileId: string,
+    workspaceId: string,
+    fileType: FileType
+  ) => void;
 }
 
 const AllFilesList = ({ onFileClick }: AllFilesListProps) => {
@@ -116,9 +127,7 @@ const AllFilesList = ({ onFileClick }: AllFilesListProps) => {
     // File type filter
     if (selectedFileTypes.length > 0) {
       filtered = filtered.filter((file) =>
-        selectedFileTypes.includes(
-          file.type === "doc" ? "document" : file.type
-        )
+        selectedFileTypes.includes(file.type === "doc" ? "document" : file.type)
       );
     }
 
@@ -138,9 +147,7 @@ const AllFilesList = ({ onFileClick }: AllFilesListProps) => {
 
     switch (dateFilter) {
       case "today":
-        filtered = filtered.filter(
-          (file) => new Date(file.createdAt) >= today
-        );
+        filtered = filtered.filter((file) => new Date(file.createdAt) >= today);
         break;
       case "yesterday":
         filtered = filtered.filter(
@@ -190,12 +197,14 @@ const AllFilesList = ({ onFileClick }: AllFilesListProps) => {
         break;
       case "newest":
         sortedFiles.sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
         break;
       case "oldest":
         sortedFiles.sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
         );
         break;
       case "recently_viewed":
@@ -356,7 +365,7 @@ const AllFilesList = ({ onFileClick }: AllFilesListProps) => {
                         onClick={() =>
                           onFileClick(
                             file.id,
-                            Number(file.workspaceId),
+                            file.workspaceId,
                             file.type as FileType
                           )
                         }
@@ -380,6 +389,26 @@ const AllFilesList = ({ onFileClick }: AllFilesListProps) => {
                             {new Date(file.createdAt).toLocaleDateString()}
                           </span>
                         </div>
+
+                         <div className="flex items-center">
+                      <div className="w-8 h-8 rounded-full overflow-hidden">
+                        <Image
+                          className="w-full h-full object-cover"
+                          width={40}
+                          height={40}
+                          src={file.createdBy.image}
+                          alt={file.createdBy.name}
+                        />
+                      </div>
+                      <div className="ml-2">
+                        <p className="text-sm font-medium">
+                          {file.createdBy.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {file.createdBy.email}
+                        </p>
+                      </div>
+                    </div>
                       </div>
                     );
                   })}
@@ -387,7 +416,11 @@ const AllFilesList = ({ onFileClick }: AllFilesListProps) => {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {files.map((file) => (
-                    <FileCard key={file.id} file={file} onFileClick={onFileClick} />
+                    <FileCard
+                      key={file.id}
+                      file={file}
+                      onFileClick={onFileClick}
+                    />
                   ))}
                 </div>
               )}

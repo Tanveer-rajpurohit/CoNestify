@@ -5,7 +5,7 @@ import { fileTypeData } from "./AllFilesList";
 
 interface FileCardProps {
   file: FileItem;
-  onFileClick: (fileId: string, workspaceId: number, fileType: FileType) => void;
+  onFileClick: (fileId: string, workspaceId: string, fileType: FileType) => void;
 }
 
 const FileCard = ({ file,onFileClick }: FileCardProps) => {
@@ -22,7 +22,7 @@ const FileCard = ({ file,onFileClick }: FileCardProps) => {
   return (
     <div
       onClick={() =>
-        onFileClick(file.id, Number(file.workspaceId), file.type as FileType)
+        onFileClick(file.id, file.workspaceId, file.type as FileType)
       }
       className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex flex-col items-center py-6"
     >

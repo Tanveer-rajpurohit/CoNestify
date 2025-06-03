@@ -16,6 +16,11 @@ export const useGetPeopleList = () => {
         body: JSON.stringify({ workspaceId }),
       });
 
+        if (res.redirected) {
+                window.location.href = res.url;
+                return;
+            }
+
       const data = await res.json();
 
       if (!res.ok) {

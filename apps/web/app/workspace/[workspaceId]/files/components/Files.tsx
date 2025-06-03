@@ -11,7 +11,7 @@ const Files = () => {
 
   const onFileClick = (
     fileId: string,
-    workspaceId: number,
+    workspaceId: string,
     fileType: string
   ) => {
     if (fileType === "canvas") {

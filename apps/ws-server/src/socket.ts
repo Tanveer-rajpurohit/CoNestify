@@ -101,6 +101,78 @@ export default function registerSocketHandlers(io: Server) {
       io.to(roomId).emit("DM-newMessage", messageData);
     });
 
+    //docs
+
+    socket.on("join-docs", (fileId: string) => {
+      if (fileId) {
+        socket.join(fileId);
+      }
+    });
+
+    socket.on("update-docs", async (data) => {
+      const { fileId, content } = data;
+
+      await prisma.doc.update({
+        where: { id: fileId },
+        data: {
+          content: JSON.stringify(content),
+        },
+      });
+
+      socket.to(fileId).emit("update-docs-complete", {
+        content,
+      });
+    });
+
+
+    //list
+    socket.on("join-list", (fileId: string) => {
+      if (fileId) {
+        socket.join(fileId);
+      }
+    });
+
+    socket.on("update-list", async (data) => {
+      const { fileId, items } = data;
+
+      await prisma.list.update({
+        where: { id: fileId },
+        data: {
+          items: JSON.stringify(items),
+        },
+      });
+
+      socket.to(fileId).emit("update-list-complete", {
+        items,
+      });
+    });
+
+    //canvas
+    socket.on("join-canvas", (fileId: string) => {
+      if (fileId) {
+        socket.join(fileId);
+      }
+    });
+
+    socket.on("update-canvas", async (data) => {
+      const { fileId, content } = data;
+
+      await prisma.canvasDoc.update({
+        where: { id: fileId },
+        data: {
+          data: JSON.stringify(content),
+        },
+      });
+
+      socket.to(fileId).emit("update-canvas-complete", {
+        content,
+      });
+    });
+
+
+
+
+
     socket.on("disconnect", () => {
       console.log(`❌ Disconnected: ${socket.id}`);
     });

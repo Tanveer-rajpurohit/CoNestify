@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 const Lists = () => {
   const { value: fileType } = selectedListType();
-  const onFileClick = (fileId: string, workspaceId: number) => {
+  const onFileClick = (fileId: string, workspaceId: string) => {
     window.location.href = `/workspace/${workspaceId}/lists/${fileId}`;
   };
 

@@ -13,7 +13,7 @@ export const useSocketStore = create<SocketState>((set, get) => ({
     if (!get().socket) {
       const socketInstance = io("ws://localhost:8000");
       socketInstance.on("connect", () => {
-        console.log("Socket connected:", socketInstance.id);
+        // console.log("Socket connected:", socketInstance.id);
       });
       set({ socket: socketInstance });
     }

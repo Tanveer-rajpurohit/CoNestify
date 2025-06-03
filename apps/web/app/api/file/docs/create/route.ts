@@ -31,7 +31,6 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
                 userId:userId,
                 workspaceId: workspaceId,
                 title:name,
-                content:[]
             }
         })
 

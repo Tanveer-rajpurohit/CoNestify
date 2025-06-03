@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Doc" ALTER COLUMN "content" DROP NOT NULL,
+ALTER COLUMN "content" SET DATA TYPE TEXT;

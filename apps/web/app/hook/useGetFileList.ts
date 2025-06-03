@@ -16,6 +16,11 @@ export const useGetFileList = () => {
         body: JSON.stringify({ workspaceId }),
       });
 
+        if (res.redirected) {
+                window.location.href = res.url;
+                return;
+            }
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -58,6 +63,11 @@ export const useGetFileList = () => {
         },
         body: JSON.stringify({ workspaceId }),
       });
+
+        if (res.redirected) {
+                window.location.href = res.url;
+                return;
+            }
 
       const data = await res.json();
 
@@ -102,6 +112,11 @@ export const useGetFileList = () => {
         body: JSON.stringify({ workspaceId }),
       });
 
+        if (res.redirected) {
+                window.location.href = res.url;
+                return;
+            }
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -144,6 +159,11 @@ export const useGetFileList = () => {
         },
         body: JSON.stringify({ workspaceId }),
       });
+
+        if (res.redirected) {
+                window.location.href = res.url;
+                return;
+            }
 
       const data = await res.json();
 

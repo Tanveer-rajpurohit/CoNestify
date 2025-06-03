@@ -7,19 +7,26 @@ import { selectedWorkspaceId } from "@context/workspaceContext";
 import { RingLoader } from "react-spinners";
 import { useCreateFile } from "app/hook/useCreateFile";
 import { X } from "lucide-react";
+import Image from "next/image";
 
 interface AllCanvasProps {
-  onFileClick: (fileId: string, workspaceId: number) => void;
+  onFileClick: (fileId: string, workspaceId: string) => void;
 }
 
 export interface CanvasFile {
   id: string;
   title: string;
-  data: string; 
-  createdAt: string; 
+  data: string;
+  createdAt: string;
   updatedAt: string;
   userId: string;
   workspaceId: string;
+  createdBy: {
+    id: true;
+    name: true;
+    email: true;
+    image: true;
+  };
 }
 
 const AllCanvas = ({ onFileClick }: AllCanvasProps) => {
@@ -140,7 +147,7 @@ const AllCanvas = ({ onFileClick }: AllCanvasProps) => {
                   <div
                     key={file.id}
                     onClick={() =>
-                      onFileClick(file.id, Number(file.workspaceId))
+                      onFileClick(file.id,file.workspaceId)
                     }
                     className="px-4 py-3 flex items-center gap-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors"
                   >
@@ -155,10 +162,30 @@ const AllCanvas = ({ onFileClick }: AllCanvasProps) => {
                       <span className="truncate text-base font-medium text-gray-800">
                         {file.title}
                       </span>
-                      
+
                       <span className="truncate text-xs text-gray-400">
                         {new Date(file.createdAt).toLocaleDateString()}
                       </span>
+                    </div>
+
+                    <div className="flex items-center">
+                      <div className="w-8 h-8 rounded-full overflow-hidden">
+                        <Image
+                          className="w-full h-full object-cover"
+                          width={40}
+                          height={40}
+                          src={file.createdBy.image}
+                          alt={file.createdBy.name}
+                        />
+                      </div>
+                      <div className="ml-2">
+                        <p className="text-sm font-medium">
+                          {file.createdBy.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {file.createdBy.email}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 ))}

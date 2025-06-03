@@ -50,6 +50,11 @@ export const useGetMessage = () => {
         },
       });
 
+        if (res.redirected) {
+                window.location.href = res.url;
+                return;
+            }
+
       const data = await res.json();
       if (!res.ok) {
         if (data.message === "Not authorized, token failed") {

@@ -8,6 +8,22 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
     return NextResponse.json({ error: "User ID is required" }, { status: 400 });
   }
   try {
+
+
+    const workspaceMember = await prisma.workspaceMember.findFirst({
+      where: {
+        userId,
+        workspaceId,
+      },
+    });
+
+     if (!workspaceMember) {
+      // Redirect to /workspace if not a member
+      return NextResponse.redirect(new URL("/workspace", req.url));
+    }
+
+
+
     const [docs, canvases, lists, files] = await Promise.all([
       prisma.doc.findMany({
         where: { workspaceId },
@@ -16,6 +32,14 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
           title: true,
           createdAt: true,
           updatedAt: true,
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          }
         },
       }),
       prisma.canvasDoc.findMany({
@@ -25,6 +49,14 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
           title: true,
           createdAt: true,
           updatedAt: true,
+           createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          }
 
         },
       }),
@@ -35,6 +67,14 @@ export const POST = async (req: NextRequest): Promise<NextResponse> => {
           title: true,
           createdAt: true,
           updatedAt: true,
+           createdBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          }
 
         },
       }),

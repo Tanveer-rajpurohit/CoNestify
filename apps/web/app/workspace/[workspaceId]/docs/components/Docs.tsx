@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 const Docs = () => {
   const { value: fileType } = selectedDocsType();
-  const onFileClick = (fileId: string, workspaceId: number) => {
+  const onFileClick = (fileId: string, workspaceId: string) => {
     window.location.href = `/workspace/${workspaceId}/docs/${fileId}`;
   };
 

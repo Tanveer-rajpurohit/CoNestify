@@ -8,7 +8,7 @@ import { selectedWorkspaceId } from "@context/workspaceContext";
 
 const Canvas = () => {
   const { value: fileType } = selectedCanvasType();
-  const onFileClick = (fileId: string, workspaceId: number) => {
+  const onFileClick = (fileId: string, workspaceId: string) => {
     window.location.href = `/workspace/${workspaceId}/canvas/${fileId}`;
   };
 
