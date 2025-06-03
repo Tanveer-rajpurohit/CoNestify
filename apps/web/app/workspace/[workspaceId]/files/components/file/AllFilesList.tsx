@@ -390,25 +390,29 @@ const AllFilesList = ({ onFileClick }: AllFilesListProps) => {
                           </span>
                         </div>
 
-                         <div className="flex items-center">
-                      <div className="w-8 h-8 rounded-full overflow-hidden">
-                        <Image
-                          className="w-full h-full object-cover"
-                          width={40}
-                          height={40}
-                          src={file.createdBy.image}
-                          alt={file.createdBy.name}
-                        />
-                      </div>
-                      <div className="ml-2">
-                        <p className="text-sm font-medium">
-                          {file.createdBy.name}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {file.createdBy.email}
-                        </p>
-                      </div>
-                    </div>
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 rounded-full overflow-hidden">
+                            <Image
+                              className="w-full h-full object-cover"
+                              width={40}
+                              height={40}
+                              src={
+                                typeof file.createdBy.image === "string"
+                                  ? file.createdBy.image
+                                  : "/placeholder-image.jpg"
+                              } 
+                              alt={String(file.createdBy.name ?? "User image")} 
+                            />
+                          </div>
+                          <div className="ml-2">
+                            <p className="text-sm font-medium">
+                              {file.createdBy.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {file.createdBy.email}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     );
                   })}
