@@ -1,13 +1,11 @@
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { prisma } from "@repo/db";
 
 function getRoomId(userId1: string, userId2: string) {
   return [userId1, userId2].sort().join("*");
 }
 
-export default function registerSocketHandlers(io: Server) {
-  io.on("connection", (socket) => {
-    console.log(`⚡️ [socket] connected: ${socket.id}`);
+export default function registerSocketHandlers(socket: Socket, io: Server) {
 
     socket.emit("connected", socket.id);
 
@@ -174,7 +172,7 @@ export default function registerSocketHandlers(io: Server) {
 
 
     socket.on("disconnect", () => {
-      console.log(`❌ Disconnected: ${socket.id}`);
+      //console.log(`❌ Disconnected: ${socket.id}`);
     });
-  });
+
 }

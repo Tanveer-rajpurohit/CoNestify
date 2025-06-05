@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { ChevronDown, Edit, Plus } from "lucide-react";
 import { IoHourglassOutline } from "react-icons/io5";
-import { PiChatCircleDotsLight, PiHeadphonesLight } from "react-icons/pi";
+import {  PiHeadphonesLight } from "react-icons/pi";
 import { AddChannelDialog } from "../../components/add-channel-dialog";
 import { InvitePeopleDialog } from "../../components/invite-people-dialog";
 import {
@@ -76,14 +76,9 @@ const HomeSidebar = () => {
 
           {!loading && workspace.data && (
             <>
-              {/* Meet & Chat */}
+              {/* Meet */}
               <div className="meet&chat flex items-start justify-center flex-col gap-2">
                 {[
-                  {
-                    id: "chat",
-                    name: "Chat",
-                    icon: <PiChatCircleDotsLight className="w-5 h-5" />,
-                  },
                   {
                     id: "meet",
                     name: "Meet",
@@ -95,7 +90,7 @@ const HomeSidebar = () => {
                     onClick={() =>
                       selected.set({
                         value: id, // or just a string identifier
-                        type: id as "chat" | "meet",
+                        type: id as "meet",
                       })
                     }
                     className={`w-full text-md px-3 py-0.5 flex items-center justify-start gap-2.5 rounded-md cursor-pointer ${

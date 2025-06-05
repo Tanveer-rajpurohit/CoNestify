@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useEffect } from "react";
 import WorkspaceLayout from "../components/WorkspaceLayout";
 import Home from "./components/Home";
@@ -9,24 +9,22 @@ const WorkspacePage = () => {
   const workspaceId = selectedWorkspaceId();
 
   useEffect(() => {
-    const pathParts = window.location.pathname.split('/');
+    const pathParts = window.location.pathname.split("/");
     const id = pathParts[2] ?? null;
     workspaceId.set(id as string);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
 
   return (
     <WorkspaceLayout>
-        <div className="h-full w-full bg-[#A69E97] pb-1 pr-1 flex items-start justify-start">
+      <div className="h-full w-full bg-[#A69E97] pb-1 pr-1 flex items-start justify-start">
         {/* sidebar to show info base on user selection on sidenav */}
-          <HomeSidebar/>
-          {/* main content area */}
-          <div className="h-full w-[calc(100%-26.35rem)] flex-1 bg-[#F8F8F8] rounded-tr-md rounded-br-md ">
-            <Home/>
-          </div>
-          
+        <HomeSidebar />
+        {/* main content area */}
+        <div className="h-full w-[calc(100%-26.35rem)] flex-1 bg-[#F8F8F8] rounded-tr-md rounded-br-md ">
+          <Home />
         </div>
+      </div>
     </WorkspaceLayout>
   );
 };

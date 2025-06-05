@@ -4,6 +4,7 @@ import React from 'react';
 import Channel from './channel/Channel';
 import DM from './DM/DM';
 import { selectedCommunication } from '@context/workspaceContext';
+import Meet from './meet/Meet';
 
 const Home = () => {
   const selctedCommunication = selectedCommunication((state)=>state.data);
@@ -16,6 +17,9 @@ const Home = () => {
     )}
     {selctedCommunication.type == "dm" && (
       <DM/>
+    )}
+    {selctedCommunication.type == "meet" && (
+      <Meet/>
     )}
     </>
   )
