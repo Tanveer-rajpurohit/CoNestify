@@ -167,7 +167,7 @@ const RecentlyFilesList = ({ onFileClick }: RecentlyFilesListProps) => {
                       onClick={() =>
                         onFileClick(
                           file.id,
-                          file.workspaceId,
+                          workspaceId.value as string,
                           file.type
                         )
                       }

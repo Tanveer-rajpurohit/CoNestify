@@ -365,7 +365,7 @@ const AllFilesList = ({ onFileClick }: AllFilesListProps) => {
                         onClick={() =>
                           onFileClick(
                             file.id,
-                            file.workspaceId,
+                            workspaceId.value as string,
                             file.type as FileType
                           )
                         }
